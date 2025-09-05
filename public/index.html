@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechBlog - 个人博客与论坛</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <i class="fas fa-code"></i>
+                    <span>TechBlog</span>
+                </div>
+                <div class="nav-menu" id="nav-menu">
+                    <a href="#home" class="nav-link active" data-section="home">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </a>
+                    <a href="#blog" class="nav-link" data-section="blog">
+                        <i class="fas fa-blog"></i>
+                        <span>博客</span>
+                    </a>
+                    <a href="#forum" class="nav-link" data-section="forum">
+                        <i class="fas fa-comments"></i>
+                        <span>论坛</span>
+                    </a>
+                    <a href="#about" class="nav-link" data-section="about">
+                        <i class="fas fa-user"></i>
+                        <span>关于</span>
+                    </a>
+                </div>
+                <div class="nav-auth" id="nav-auth">
+                    <button class="btn btn-outline" id="login-btn">登录</button>
+                    <button class="btn btn-primary" id="register-btn">注册</button>
+                </div>
+                <div class="nav-user" id="nav-user" style="display: none;">
+                    <div class="user-menu">
+                        <img src="https://via.placeholder.com/32" alt="Avatar" class="user-avatar" id="user-avatar">
+                        <span class="user-name" id="user-name">用户名</span>
+                        <i class="fas fa-chevron-down"></i>
+                        <div class="user-dropdown">
+                            <a href="#profile"><i class="fas fa-user"></i> 个人资料</a>
+                            <a href="#settings"><i class="fas fa-cog"></i> 设置</a>
+                            <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-toggle" id="nav-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Home Section -->
+            <section id="home-section" class="section active">
+                <div class="hero">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            <span class="gradient-text">TechBlog</span>
+                            <br>个人博客与论坛
+                        </h1>
+                        <p class="hero-description">
+                            分享技术见解，交流编程心得，构建开发者社区
+                        </p>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-large" data-section="blog">
+                                <i class="fas fa-blog"></i>
+                                浏览博客
+                            </button>
+                            <button class="btn btn-outline btn-large" data-section="forum">
+                                <i class="fas fa-comments"></i>
+                                加入论坛
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="code-animation">
+                            <div class="code-line">
+                                <span class="code-keyword">const</span>
+                                <span class="code-variable">techBlog</span>
+                                <span class="code-operator">=</span>
+                                <span class="code-string">'awesome'</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="code-keyword">function</span>
+                                <span class="code-function">shareKnowledge</span>
+                                <span class="code-bracket">()</span>
+                                <span class="code-bracket">{</span>
+                            </div>
+                            <div class="code-line indent">
+                                <span class="code-keyword">return</span>
+                                <span class="code-string">'learning'</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="code-bracket">}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <div class="container">
+                        <h2 class="section-title">功能特色</h2>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-pen-fancy"></i>
+                                </div>
+                                <h3>技术博客</h3>
+                                <p>分享编程经验、技术教程和项目心得</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3>互动论坛</h3>
+                                <p>与开发者交流，讨论技术问题和解决方案</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <h3>社区互动</h3>
+                                <p>点赞、评论、收藏，构建活跃的技术社区</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Blog Section -->
+            <section id="blog-section" class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">技术博客</h2>
+                        <button class="btn btn-primary" id="create-blog-btn" style="display: none;">
+                            <i class="fas fa-plus"></i>
+                            写文章
+                        </button>
+                    </div>
+                    
+                    <div class="blog-filters">
+                        <button class="filter-btn active" data-filter="all">全部</button>
+                        <button class="filter-btn" data-filter="frontend">前端</button>
+                        <button class="filter-btn" data-filter="backend">后端</button>
+                        <button class="filter-btn" data-filter="devops">运维</button>
+                        <button class="filter-btn" data-filter="mobile">移动端</button>
+                    </div>
+
+                    <div class="blog-grid" id="blog-grid">
+                        <!-- Blog posts will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Forum Section -->
+            <section id="forum-section" class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">技术论坛</h2>
+                        <button class="btn btn-primary" id="create-forum-btn" style="display: none;">
+                            <i class="fas fa-plus"></i>
+                            发帖子
+                        </button>
+                    </div>
+
+                    <div class="forum-categories">
+                        <button class="category-btn active" data-category="all">全部</button>
+                        <button class="category-btn" data-category="general">综合讨论</button>
+                        <button class="category-btn" data-category="tech">技术交流</button>
+                        <button class="category-btn" data-category="lifestyle">生活分享</button>
+                        <button class="category-btn" data-category="help">求助问答</button>
+                    </div>
+
+                    <div class="forum-posts" id="forum-posts">
+                        <!-- Forum posts will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about-section" class="section">
+                <div class="container">
+                    <div class="about-content">
+                        <div class="about-text">
+                            <h2 class="section-title">关于 TechBlog</h2>
+                            <p>
+                                这是一个专注于技术分享的个人博客与论坛平台。我们致力于为开发者提供一个
+                                交流技术、分享经验、共同成长的社区环境。
+                            </p>
+                            <p>
+                                在这里，你可以发布技术文章、参与讨论、学习新技术，与志同道合的开发者
+                                建立联系，共同推动技术社区的发展。
+                            </p>
+                            <div class="about-stats">
+                                <div class="stat">
+                                    <div class="stat-number" id="total-posts">0</div>
+                                    <div class="stat-label">文章总数</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-number" id="total-users">0</div>
+                                    <div class="stat-label">注册用户</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-number" id="total-comments">0</div>
+                                    <div class="stat-label">评论总数</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="about-image">
+                            <div class="tech-illustration">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modals -->
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>登录</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">用户名</label>
+                        <input type="text" id="login-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">密码</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">登录</button>
+                </form>
+                <div class="modal-footer">
+                    <p>还没有账号？ <a href="#" id="switch-to-register">立即注册</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Modal -->
+        <div id="register-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>注册</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-username">用户名</label>
+                        <input type="text" id="register-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">邮箱</label>
+                        <input type="email" id="register-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">密码</label>
+                        <input type="password" id="register-password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">注册</button>
+                </form>
+                <div class="modal-footer">
+                    <p>已有账号？ <a href="#" id="switch-to-login">立即登录</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Blog Modal -->
+        <div id="create-blog-modal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3>写文章</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form id="create-blog-form">
+                    <div class="form-group">
+                        <label for="blog-title">标题</label>
+                        <input type="text" id="blog-title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog-excerpt">摘要</label>
+                        <textarea id="blog-excerpt" name="excerpt" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog-content">内容</label>
+                        <textarea id="blog-content" name="content" rows="10" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog-tags">标签（用逗号分隔）</label>
+                        <input type="text" id="blog-tags" name="tags" placeholder="JavaScript, React, Node.js">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" id="save-draft">保存草稿</button>
+                        <button type="submit" class="btn btn-primary">发布文章</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Create Forum Post Modal -->
+        <div id="create-forum-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>发帖子</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form id="create-forum-form">
+                    <div class="form-group">
+                        <label for="forum-title">标题</label>
+                        <input type="text" id="forum-title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forum-category">分类</label>
+                        <select id="forum-category" name="category" required>
+                            <option value="general">综合讨论</option>
+                            <option value="tech">技术交流</option>
+                            <option value="lifestyle">生活分享</option>
+                            <option value="help">求助问答</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="forum-content">内容</label>
+                        <textarea id="forum-content" name="content" rows="8" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="forum-tags">标签（用逗号分隔）</label>
+                        <input type="text" id="forum-tags" name="tags" placeholder="JavaScript, 问题, 求助">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">发布帖子</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
