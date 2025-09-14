@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>趣味MBTI性格测试 | 发现真实的自己</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- 引入Inter字体 -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#7C3AED',
+            secondary: '#EC4899',
+            dark: '#1F2937',
+            light: '#F9FAFB',
+            accent: '#3B82F6',
+            success: '#10B981',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in forwards',
+            'slide-up': 'slideInUp 0.6s ease-out forwards',
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s ease-in-out infinite',
+            'bounce-slow': 'bounce 3s infinite',
+            'spin-slow': 'spin 8s linear infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideInUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            glow: {
+              '0%': { boxShadow: '0 0 5px rgba(124, 58, 237, 0.5)' },
+              '100%': { boxShadow: '0 0 20px rgba(124, 58, 237, 0.8)' },
+            }
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .bg-gradient-animated {
+        background-size: 400% 400%;
+        animation: gradientMove 8s ease infinite;
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-8px) rotate(1deg);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .btn-ripple {
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-ripple:after {
+        content: "";
+        background: rgba(255,255,255,0.3);
+        display: block;
+        position: absolute;
+        padding-top: 300%;
+        padding-left: 350%;
+        margin-left: -20px !important;
+        margin-top: -120%;
+        opacity: 0;
+        transition: all 0.8s;
+        border-radius: 50%;
+      }
+      .btn-ripple:active:after {
+        padding: 0;
+        margin: 0;
+        opacity: 1;
+        transition: 0s;
+      }
+      .blob {
+        border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+        animation: blob-morph 8s linear infinite;
+      }
+      .blob2 {
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        animation: blob-morph 6s linear infinite;
+      }
+      .star {
+        position: absolute;
+        background-color: white;
+        border-radius: 50%;
+        animation: twinkle 3s infinite ease-in-out;
+      }
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        animation: confetti-fall 5s ease-in-out forwards;
+      }
+    }
+    
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes blob-morph {
+      0% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+      25% { border-radius: 58% 42% 30% 70% / 55% 55% 45% 45%; }
+      50% { border-radius: 35% 65% 50% 50% / 45% 45% 55% 55%; }
+      75% { border-radius: 65% 35% 40% 60% / 55% 55% 45% 45%; }
+      100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.5; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+    
+    @keyframes confetti-fall {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    
+    /* 进度条动画 */
+    @keyframes progress {
+      from { width: 0; }
+      to { width: var(--progress-width); }
+    }
+    
+    /* 数字计数动画 */
+    @keyframes countUp {
+      from { counter-reset: count 0; }
+      to { counter-reset: count var(--count-value); }
+    }
+    
+    .count-animation::after {
+      content: counter(count);
+      animation: countUp 1s forwards;
+    }
+    
+  </style>
+</head>
+
+<body class="font-inter bg-light text-dark min-h-screen overflow-x-hidden">
+  <!-- 渐变背景 -->
+  <div class="fixed inset-0 bg-gradient-animated bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 -z-10"></div>
+  
+  <!-- 装饰元素 -->
+  <div class="fixed top-20 -left-20 w-64 h-64 bg-primary/20 blob animate-float -z-10"></div>
+  <div class="fixed bottom-20 -right-20 w-80 h-80 bg-secondary/20 blob2 animate-float -z-10" style="animation-delay: 1s;"></div>
+  
+  <!-- 星星装饰 -->
+  <div id="stars-container" class="fixed inset-0 pointer-events-none -z-10"></div>
+  
+  <!-- 导航栏 -->
+  <header id="navbar" class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 transition-all duration-300 py-4">
+    <div class="container mx-auto px-4 md:px-6">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+            <i class="fa fa-star text-white text-xl"></i>
+          </div>
+          <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">MBTI测试</h1>
+        </div>
+        
+        <!-- 桌面端导航 -->
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="分类.html" class="nav-link text-dark/80 hover:text-primary transition-colors">返回</a>
+          <a href="#home" class="nav-link text-dark/80 hover:text-primary transition-colors">首页</a>
+          <a href="#test" class="nav-link text-dark/80 hover:text-primary transition-colors">开始测试</a>
+          <a href="#about" class="nav-link text-dark/80 hover:text-primary transition-colors">关于MBTI</a>
+          <a href="#contact" class="nav-link text-dark/80 hover:text-primary transition-colors">联系我们</a>
+        </nav>
+        
+        <!-- 移动端菜单按钮 -->
+        <button id="menu-toggle" class="md:hidden text-dark text-2xl">
+          <i class="fa fa-bars"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 移动端导航菜单 -->
+    <div id="mobile-menu" class="md:hidden fixed inset-0 bg-white z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-8">
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <i class="fa fa-star text-white text-xl"></i>
+            </div>
+            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">MBTI测试</h1>
+          </div>
+          <button id="menu-close" class="text-dark text-2xl">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <nav class="flex flex-col gap-6 text-lg">
+          <a href="#home" class="mobile-nav-link py-2 border-b border-gray-100">首页</a>
+          <a href="#test" class="mobile-nav-link py-2 border-b border-gray-100">开始测试</a>
+          <a href="#about" class="mobile-nav-link py-2 border-b border-gray-100">关于MBTI</a>
+          <a href="#contact" class="mobile-nav-link py-2 border-b border-gray-100">联系我们</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24 pb-16">
+    <!-- 首页区域 -->
+    <section id="home" class="container mx-auto px-4 md:px-6 py-12 md:py-24">
+      <div class="flex flex-col md:flex-row items-center gap-12">
+        <div class="md:w-1/2 animate-fade-in">
+          <h2 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight text-shadow mb-6">
+            发现你的<br>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">真实人格类型</span>
+          </h2>
+          <p class="text-lg text-dark/70 mb-8 max-w-lg">
+            通过这个有趣的MBTI测试，探索你的性格特点、优势与潜在发展方向。只需几分钟，发现更了解自己的新视角！
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="#test" class="btn-ripple bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-8 rounded-full text-center hover:shadow-lg hover:shadow-primary/20 transition-all transform hover:scale-105">
+              开始测试 <i class="fa fa-arrow-right ml-2"></i>
+            </a>
+            <a href="#about" class="btn-ripple bg-white border border-primary/20 text-primary font-medium py-3 px-8 rounded-full text-center hover:bg-primary/5 transition-all transform hover:scale-105">
+              了解更多 <i class="fa fa-info-circle ml-2"></i>
+            </a>
+          </div>
+          
+          <div class="mt-12 flex items-center gap-6">
+            <div class="flex -space-x-3">
+              <img src="https://picsum.photos/id/1001/100/100" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+              <img src="https://picsum.photos/id/1002/100/100" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+              <img src="https://picsum.photos/id/1003/100/100" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+              <img src="https://picsum.photos/id/1004/100/100" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+              <div class="w-10 h-10 rounded-full bg-primary/10 text-primary border-2 border-white flex items-center justify-center text-xs font-medium">
+                1k+
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center text-warning mb-1">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star-half-o"></i>
+                <span class="ml-2 text-dark/70">4.8/5</span>
+              </div>
+              <p class="text-sm text-dark/60">来自1000+用户的好评</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="md:w-1/2 relative animate-slide-up">
+          <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl card-hover">
+            <img src="https://picsum.photos/id/1005/600/400" alt="MBTI性格测试" class="w-full h-auto">
+            <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent flex items-end">
+              <div class="p-6 text-white">
+                <h3 class="text-xl font-bold mb-2">16种人格类型</h3>
+                <p class="text-white/80">探索你的独特性格特征</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 装饰元素 -->
+          <div class="absolute -top-6 -right-6 w-24 h-24 bg-secondary/30 rounded-full blur-xl animate-pulse-slow"></div>
+          <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/30 rounded-full blur-xl animate-pulse-slow" style="animation-delay: 1s;"></div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 特点介绍 -->
+    <section class="container mx-auto px-4 md:px-6 py-12">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">为什么选择我们的测试？</h2>
+        <p class="text-dark/70">我们的MBTI测试结合了专业心理学理论和趣味元素，让你在轻松愉快的氛围中探索自我</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-xl p-6 shadow-lg card-hover">
+          <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+            <i class="fa fa-bolt text-primary text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">快速准确</h3>
+          <p class="text-dark/70">仅需20道题，10分钟内即可完成测试，结果基于专业MBTI理论框架</p>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-lg card-hover">
+          <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mb-6">
+            <i class="fa fa-lock text-secondary text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">隐私保护</h3>
+          <p class="text-dark/70">所有测试数据仅存储在你的设备上，不会上传至任何服务器，保护你的隐私</p>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-lg card-hover">
+          <div class="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-6">
+            <i class="fa fa-share-alt text-accent text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">趣味分享</h3>
+          <p class="text-dark/70">生成精美的结果卡片，一键分享到社交媒体，看看你的朋友们都是什么类型</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 测试区域 -->
+    <section id="test" class="container mx-auto px-4 md:px-6 py-12">
+      <div class="max-w-3xl mx-auto">
+        <!-- 测试介绍/开始 -->
+        <div id="test-intro" class="text-center py-12">
+          <div class="inline-block mb-6">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center animate-pulse-slow">
+              <i class="fa fa-question-circle text-white text-3xl"></i>
+            </div>
+          </div>
+          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">MBTI性格测试</h2>
+          <p class="text-dark/70 mb-8">
+            这个测试包含20个问题，将帮助你确定自己的MBTI人格类型。请根据你的真实情况和第一反应进行选择。
+          </p>
+          
+          <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+            <div class="flex items-center gap-2 bg-white p-3 rounded-lg shadow-sm">
+              <i class="fa fa-clock-o text-primary"></i>
+              <span>约10分钟完成</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white p-3 rounded-lg shadow-sm">
+              <i class="fa fa-question-circle text-primary"></i>
+              <span>20个问题</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white p-3 rounded-lg shadow-sm">
+              <i class="fa fa-line-chart text-primary"></i>
+              <span>详细分析</span>
+            </div>
+          </div>
+          
+          <button id="start-test" class="btn-ripple bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-8 rounded-full text-center hover:shadow-lg hover:shadow-primary/20 transition-all transform hover:scale-105">
+            开始测试 <i class="fa fa-arrow-right ml-2"></i>
+          </button>
+          
+          <!-- 继续测试按钮（如果有保存的进度） -->
+          <button id="continue-test" class="hidden mt-4 btn-ripple bg-white border border-primary/20 text-primary font-medium py-3 px-8 rounded-full text-center hover:bg-primary/5 transition-all transform hover:scale-105">
+            继续上次测试 <i class="fa fa-history ml-2"></i>
+          </button>
+        </div>
+        
+        <!-- 测试进行中 -->
+        <div id="test-container" class="hidden">
+          <!-- 进度条 -->
+          <div class="mb-8">
+            <div class="flex justify-between mb-2">
+              <span class="text-sm font-medium text-dark/70">进度</span>
+              <span id="progress-text" class="text-sm font-medium text-primary">0/20</span>
+            </div>
+            <div class="h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div id="progress-bar" class="h-full bg-gradient-to-r from-primary to-secondary w-0 transition-all duration-500"></div>
+            </div>
+            
+            <!-- 环形进度条（桌面端） -->
+            <div class="hidden md:flex justify-center mt-8">
+              <div class="relative w-24 h-24">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#F3F4F6" stroke-width="8"/>
+                  <circle id="circle-progress" cx="50" cy="50" r="45" fill="none" stroke="url(#progress-gradient)" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283" transform="rotate(-90 50 50)"/>
+                  <defs>
+                    <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#7C3AED"/>
+                      <stop offset="100%" stop-color="#EC4899"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span id="circle-percentage" class="text-xl font-bold text-primary">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 题目卡片 -->
+          <div id="question-card" class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 card-hover">
+            <h3 id="question-number" class="text-lg font-medium text-primary mb-4">问题 1/20</h3>
+            <h4 id="question-text" class="text-xl font-bold mb-6">当你有空闲时间时，你更倾向于？</h4>
+            
+            <div id="answers-container" class="space-y-3">
+              <div class="answer-option p-4 border border-gray-200 rounded-xl hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all">
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <div class="mt-1 w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0 answer-radio"></div>
+                  <span>A. 和朋友外出或参加社交活动</span>
+                </label>
+              </div>
+              
+              <div class="answer-option p-4 border border-gray-200 rounded-xl hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all">
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <div class="mt-1 w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0 answer-radio"></div>
+                  <span>B. 待在家里读书或独自放松</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 导航按钮 -->
+          <div class="flex justify-between">
+            <button id="prev-btn" class="btn-ripple bg-white border border-gray-200 text-dark font-medium py-3 px-6 rounded-full opacity-50 cursor-not-allowed transition-all">
+              <i class="fa fa-arrow-left mr-2"></i> 上一题
+            </button>
+            
+            <button id="next-btn" class="btn-ripple bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-6 rounded-full hover:shadow-lg hover:shadow-primary/20 transition-all transform hover:scale-105">
+              下一题 <i class="fa fa-arrow-right ml-2"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 结果表单 -->
+        <div id="result-form" class="hidden bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8">
+          <h3 class="text-2xl font-bold mb-6 text-center">完成测试！</h3>
+          <p class="text-dark/70 mb-6 text-center">请填写以下信息，获取你的个性化MBTI分析报告</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-dark/80 mb-1">你的昵称</label>
+              <div class="relative">
+                <input type="text" id="username" placeholder="请输入你的昵称" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                <div class="hidden error-message text-danger text-sm mt-1">
+                  <i class="fa fa-exclamation-circle mr-1"></i> 昵称不能为空
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-dark/80 mb-1">电子邮箱（选填）</label>
+              <div class="relative">
+                <input type="email" id="email" placeholder="输入邮箱以保存完整报告" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                <div class="hidden error-message text-danger text-sm mt-1">
+                  <i class="fa fa-exclamation-circle mr-1"></i> 请输入有效的邮箱地址
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-8">
+            <button id="submit-result" class="btn-ripple w-full bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all transform hover:scale-[1.02]">
+              获取我的性格报告 <i class="fa fa-magic ml-2"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 测试结果 -->
+        <div id="test-result" class="hidden">
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <!-- 结果头部 -->
+            <div class="bg-gradient-to-r from-primary to-secondary p-6 md:p-8 text-white text-center">
+              <h3 id="result-title" class="text-2xl font-bold mb-2">你的MBTI性格类型是</h3>
+              <div id="personality-type" class="text-4xl md:text-5xl font-bold mb-4 tracking-wider">INFP</div>
+              <p id="personality-name" class="text-white/90 text-lg">调停者</p>
+            </div>
+            
+            <!-- 结果内容 -->
+            <div class="p-6 md:p-8">
+              <div class="flex flex-col md:flex-row gap-8 mb-8">
+                <div class="md:w-1/2">
+                  <h4 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fa fa-user-circle text-primary mr-2"></i> 关于你的性格
+                  </h4>
+                  <p id="personality-description" class="text-dark/70 leading-relaxed">
+                    你是理想主义者，充满创造力和洞察力。你对他人富有同情心，常常为了帮助别人而牺牲自己的利益。你重视和谐与真诚，讨厌冲突和虚伪。
+                  </p>
+                </div>
+                
+                <div class="md:w-1/2">
+                  <h4 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fa fa-lightbulb-o text-primary mr-2"></i> 你的优势
+                  </h4>
+                  <ul id="personality-strengths" class="text-dark/70 space-y-2">
+                    <li class="flex items-start">
+                      <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                      <span>富有创造力和想象力</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                      <span>对他人富有同情心和理解力</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                      <span>坚持自己的价值观和理想</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                      <span>善于发现事物的深层意义</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <!-- 性格标签 -->
+              <div class="mb-8">
+                <h4 class="text-xl font-bold mb-4 flex items-center">
+                  <i class="fa fa-tags text-primary mr-2"></i> 你的性格标签
+                </h4>
+                <div id="personality-tags" class="flex flex-wrap gap-2">
+                  <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">理想主义</span>
+                  <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">富有同情心</span>
+                  <span class="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm">创造力</span>
+                  <span class="bg-success/10 text-success px-3 py-1 rounded-full text-sm">忠诚</span>
+                  <span class="bg-warning/10 text-warning px-3 py-1 rounded-full text-sm">内向</span>
+                  <span class="bg-danger/10 text-danger px-3 py-1 rounded-full text-sm">敏感</span>
+                </div>
+              </div>
+              
+              <!-- 搞笑建议 -->
+              <div class="bg-light rounded-xl p-5 mb-8">
+                <h4 class="text-xl font-bold mb-4 flex items-center">
+                  <i class="fa fa-smile-o text-primary mr-2"></i> 给你的搞笑小建议
+                </h4>
+                <p id="funny-advice" class="text-dark/70 italic">
+                  记得偶尔从自己的理想世界中出来透透气，现实世界虽然不完美，但有披萨和Wi-Fi啊！
+                </p>
+              </div>
+              
+              <!-- 分享按钮 -->
+              <div>
+                <h4 class="text-xl font-bold mb-4 flex items-center">
+                  <i class="fa fa-share-alt text-primary mr-2"></i> 分享你的结果
+                </h4>
+                <div class="flex flex-wrap gap-3">
+                  <button class="btn-ripple bg-[#1877F2] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:shadow-lg transition-all transform hover:scale-105">
+                    <i class="fa fa-facebook"></i> Facebook
+                  </button>
+                  <button class="btn-ripple bg-[#1DA1F2] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:shadow-lg transition-all transform hover:scale-105">
+                    <i class="fa fa-twitter"></i> Twitter
+                  </button>
+                  <button class="btn-ripple bg-[#E4405F] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:shadow-lg transition-all transform hover:scale-105">
+                    <i class="fa fa-instagram"></i> Instagram
+                  </button>
+                  <button id="copy-link" class="btn-ripple bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:shadow-lg transition-all transform hover:scale-105">
+                    <i class="fa fa-link"></i> 复制链接
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 操作按钮 -->
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button id="retake-test" class="btn-ripple bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-8 rounded-full text-center hover:shadow-lg hover:shadow-primary/20 transition-all transform hover:scale-105">
+              重新测试 <i class="fa fa-refresh ml-2"></i>
+            </button>
+            <button id="back-home" class="btn-ripple bg-white border border-primary/20 text-primary font-medium py-3 px-8 rounded-full text-center hover:bg-primary/5 transition-all transform hover:scale-105">
+              返回首页 <i class="fa fa-home ml-2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 关于MBTI -->
+    <section id="about" class="container mx-auto px-4 md:px-6 py-12">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">关于MBTI</h2>
+          <p class="text-dark/70">了解MBTI人格类型的基本概念和四个维度</p>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-12">
+          <p class="text-dark/80 mb-6 leading-relaxed">
+            MBTI（迈尔斯-布里格斯类型指标）是一种广泛使用的人格评估工具，基于卡尔·荣格的心理类型理论发展而来。它将人格分为16种类型，每种类型由四个维度的偏好组合而成。
+          </p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 class="text-xl font-bold mb-4 text-primary">四个维度</h3>
+              <ul class="space-y-4">
+                <li>
+                  <h4 class="font-bold mb-1">能量来源：外向(E) vs 内向(I)</h4>
+                  <p class="text-dark/70 text-sm">你更倾向于从社交活动中获取能量，还是从独处中恢复精力？</p>
+                </li>
+                <li>
+                  <h4 class="font-bold mb-1">信息获取：感觉(S) vs 直觉(N)</h4>
+                  <p class="text-dark/70 text-sm">你更关注实际的事实和细节，还是抽象的可能性和模式？</p>
+                </li>
+                <li>
+                  <h4 class="font-bold mb-1">决策方式：思考(T) vs 情感(F)</h4>
+                  <p class="text-dark/70 text-sm">你做决策时更依赖逻辑分析，还是考虑人际关系和价值观？</p>
+                </li>
+                <li>
+                  <h4 class="font-bold mb-1">生活方式：判断(J) vs 知觉(P)</h4>
+                  <p class="text-dark/70 text-sm">你更倾向于有计划、有组织的生活，还是灵活、即兴的方式？</p>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 class="text-xl font-bold mb-4 text-primary">16种人格类型</h3>
+              <div class="flex flex-wrap gap-2">
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">ISTJ</span>
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">ISFJ</span>
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">INFJ</span>
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">INTJ</span>
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">ISTP</span>
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">ISFP</span>
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">INFP</span>
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">INTP</span>
+                <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">ESTP</span>
+                <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">ESFP</span>
+                <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">ENFP</span>
+                <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">ENTP</span>
+                <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">ESTJ</span>
+                <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">ESFJ</span>
+                <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">ENFJ</span>
+                <span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm">ENTJ</span>
+              </div>
+              
+              <p class="text-dark/70 text-sm mt-4">
+                每种类型都有其独特的优势、盲点和适合的职业方向。MBTI不是给人贴标签，而是帮助我们理解自己和他人的差异，更好地沟通和合作。
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-center">
+          <a href="#test" class="inline-block btn-ripple bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-8 rounded-full text-center hover:shadow-lg hover:shadow-primary/20 transition-all transform hover:scale-105">
+            开始发现你的类型 <i class="fa fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 联系我们 -->
+    <section id="contact" class="container mx-auto px-4 md:px-6 py-12">
+      <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">联系我们</h2>
+          <p class="text-dark/70">有任何问题或建议？请告诉我们</p>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-dark/80 mb-1">你的姓名</label>
+              <div class="relative">
+                <input type="text" id="contact-name" placeholder="请输入你的姓名" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                <div class="hidden error-message text-danger text-sm mt-1">
+                  <i class="fa fa-exclamation-circle mr-1"></i> 姓名不能为空
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-dark/80 mb-1">电子邮箱</label>
+              <div class="relative">
+                <input type="email" id="contact-email" placeholder="请输入你的邮箱" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                <div class="hidden error-message text-danger text-sm mt-1">
+                  <i class="fa fa-exclamation-circle mr-1"></i> 请输入有效的邮箱地址
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-dark/80 mb-1">你的留言</label>
+              <div class="relative">
+                <textarea id="contact-message" rows="4" placeholder="请输入你的留言内容" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"></textarea>
+                <div class="text-right text-xs text-dark/50 mt-1">
+                  <span id="char-count">0</span>/500
+                </div>
+                <div class="hidden error-message text-danger text-sm mt-1">
+                  <i class="fa fa-exclamation-circle mr-1"></i> 留言不能为空
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-8">
+            <button id="submit-contact" class="btn-ripple w-full bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all transform hover:scale-[1.02]">
+              发送留言 <i class="fa fa-paper-plane ml-2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <!-- 页脚 -->
+  <footer class="bg-dark text-white py-12">
+    <div class="container mx-auto px-4 md:px-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <i class="fa fa-star text-white text-xl"></i>
+            </div>
+            <h3 class="text-xl font-bold">MBTI测试</h3>
+          </div>
+          <p class="text-white/70 text-sm">
+            一个有趣的MBTI性格测试工具，帮助你更好地了解自己和他人。
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="font-bold mb-4">快速链接</h4>
+          <ul class="space-y-2 text-sm text-white/70">
+            <li><a href="#home" class="hover:text-primary transition-colors">首页</a></li>
+            <li><a href="#test" class="hover:text-primary transition-colors">开始测试</a></li>
+            <li><a href="#about" class="hover:text-primary transition-colors">关于MBTI</a></li>
+            <li><a href="#contact" class="hover:text-primary transition-colors">联系我们</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-bold mb-4">相关资源</h4>
+          <ul class="space-y-2 text-sm text-white/70">
+            <li><a href="#" class="hover:text-primary transition-colors">MBTI类型解析</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">职业匹配指南</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">人际关系建议</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">常见问题</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-bold mb-4">订阅更新</h4>
+          <p class="text-white/70 text-sm mb-4">
+            订阅我们的通讯，获取最新的MBTI资讯和测试更新。
+          </p>
+          <div class="flex">
+            <input type="email" id="subscribe-email" placeholder="你的邮箱地址" class="flex-1 px-4 py-2 rounded-l-lg outline-none text-dark">
+            <button id="subscribe-btn" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-r-lg transition-colors">
+              <i class="fa fa-envelope"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-white/50 text-sm mb-4 md:mb-0">
+          &copy; 2023 MBTI测试. 保留所有权利.
+        </p>
+        <div class="flex gap-4">
+          <a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+            <i class="fa fa-facebook"></i>
+          </a>
+          <a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+            <i class="fa fa-twitter"></i>
+          </a>
+          <a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+            <i class="fa fa-instagram"></i>
+          </a>
+          <a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+            <i class="fa fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- 回到顶部按钮 -->
+  <button id="back-to-top" class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary text-white shadow-lg flex items-center justify-center opacity-0 invisible transition-all z-40 hover:scale-110">
+    <i class="fa fa-arrow-up"></i>
+  </button>
+  
+  <!-- 通知弹窗 -->
+  <div id="notification" class="fixed top-8 right-8 max-w-xs bg-white rounded-xl shadow-2xl p-4 transform translate-x-full opacity-0 transition-all z-50 flex items-start gap-3">
+    <div id="notification-icon" class="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
+      <i class="fa fa-check text-success"></i>
+    </div>
+    <div class="flex-1">
+      <h4 id="notification-title" class="font-bold text-dark mb-1">操作成功</h4>
+      <p id="notification-message" class="text-dark/70 text-sm">你的操作已成功完成</p>
+    </div>
+    <button id="close-notification" class="text-dark/50 hover:text-dark">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+  
+  <!-- 提交模拟弹窗 -->
+  <div id="submit-modal" class="fixed inset-0 bg-dark/50 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 invisible transition-all">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 transform scale-95 transition-all">
+      <div id="modal-icon-container" class="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
+        <i id="modal-icon" class="fa fa-check text-success text-2xl"></i>
+      </div>
+      <h3 id="modal-title" class="text-xl font-bold text-center mb-3">提交成功</h3>
+      <p id="modal-message" class="text-dark/70 text-center mb-6">感谢你的提交，我们会尽快处理你的请求</p>
+      <button id="close-modal" class="btn-ripple w-full bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all transform hover:scale-[1.02]">
+        确定
+      </button>
+    </div>
+  </div>
+  
+  <!-- 加载动画 -->
+  <div id="loader" class="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 invisible transition-all">
+    <div class="flex gap-2">
+      <div class="w-3 h-3 rounded-full bg-primary animate-bounce"></div>
+      <div class="w-3 h-3 rounded-full bg-primary animate-bounce" style="animation-delay: 0.2s;"></div>
+      <div class="w-3 h-3 rounded-full bg-primary animate-bounce" style="animation-delay: 0.4s;"></div>
+    </div>
+  </div>
+  
+  <!-- 彩纸容器 -->
+  <div id="confetti-container" class="fixed inset-0 pointer-events-none z-40"></div>
+  
+  <script>
+    // 生成星星装饰
+    function createStars() {
+      const container = document.getElementById('stars-container');
+      const count = 50;
+      
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        
+        // 随机大小
+        const size = Math.random() * 3 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // 随机位置
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        
+        // 随机动画延迟和持续时间
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        star.style.animationDuration = `${Math.random() * 2 + 2}s`;
+        
+        container.appendChild(star);
+      }
+    }
+    
+    // 导航栏滚动效果
+    function handleNavbarScroll() {
+      const navbar = document.getElementById('navbar');
+      const backToTop = document.getElementById('back-to-top');
+      
+      if (window.scrollY > 50) {
+        navbar.classList.add('shadow-md', 'py-2');
+        navbar.classList.remove('py-4');
+        
+        if (window.scrollY > 300) {
+          backToTop.classList.remove('opacity-0', 'invisible');
+          backToTop.classList.add('opacity-100', 'visible');
+        } else {
+          backToTop.classList.add('opacity-0', 'invisible');
+          backToTop.classList.remove('opacity-100', 'visible');
+        }
+      } else {
+        navbar.classList.remove('shadow-md', 'py-2');
+        navbar.classList.add('py-4');
+        backToTop.classList.add('opacity-0', 'invisible');
+        backToTop.classList.remove('opacity-100', 'visible');
+      }
+    }
+    
+    // 移动端菜单
+    function setupMobileMenu() {
+      const menuToggle = document.getElementById('menu-toggle');
+      const menuClose = document.getElementById('menu-close');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+      
+      menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.remove('translate-x-full');
+        document.body.style.overflow = 'hidden';
+      });
+      
+      function closeMenu() {
+        mobileMenu.classList.add('translate-x-full');
+        document.body.style.overflow = '';
+      }
+      
+      menuClose.addEventListener('click', closeMenu);
+      
+      mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+      });
+    }
+    
+    // 平滑滚动
+    function setupSmoothScroll() {
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 80,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+      
+      // 回到顶部按钮
+      document.getElementById('back-to-top').addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+    
+    // 测试题目数据
+    const questions = [
+      {
+        text: "当你有空闲时间时，你更倾向于？",
+        options: [
+          "A. 和朋友外出或参加社交活动",
+          "B. 待在家里读书或独自放松"
+        ],
+        dimension: "EI",
+        value: [1, 0] // A对应E(1), B对应I(0)
+      },
+      {
+        text: "你做决策时更依赖？",
+        options: [
+          "A. 逻辑分析和客观事实",
+          "B. 个人价值观和对他人的影响"
+        ],
+        dimension: "TF",
+        value: [1, 0] // A对应T(1), B对应F(0)
+      },
+      {
+        text: "你更关注？",
+        options: [
+          "A. 实际的事实和细节",
+          "B. 抽象的可能性和未来的潜力"
+        ],
+        dimension: "SN",
+        value: [1, 0] // A对应S(1), B对应N(0)
+      },
+      {
+        text: "你更倾向于？",
+        options: [
+          "A. 有计划、有组织的生活",
+          "B. 灵活、即兴的生活方式"
+        ],
+        dimension: "JP",
+        value: [1, 0] // A对应J(1), B对应P(0)
+      },
+      {
+        text: "在团队中，你通常是？",
+        options: [
+          "A. 主动发言，带动讨论",
+          "B. 倾听为主，必要时发言"
+        ],
+        dimension: "EI",
+        value: [1, 0]
+      },
+      {
+        text: "你对新信息的处理方式是？",
+        options: [
+          "A. 注重细节，逐步理解",
+          "B. 先把握整体，再填充细节"
+        ],
+        dimension: "SN",
+        value: [1, 0]
+      },
+      {
+        text: "做决定时，你更看重？",
+        options: [
+          "A. 公平和原则",
+          "B. 和谐和人际关系"
+        ],
+        dimension: "TF",
+        value: [1, 0]
+      },
+      {
+        text: "对于日程安排，你偏好？",
+        options: [
+          "A. 提前规划好，按计划进行",
+          "B. 保持开放，根据情况调整"
+        ],
+        dimension: "JP",
+        value: [1, 0]
+      },
+      {
+        text: "当你需要恢复精力时，你会？",
+        options: [
+          "A. 和朋友聚会聊天",
+          "B. 独自一人做喜欢的事情"
+        ],
+        dimension: "EI",
+        value: [1, 0]
+      },
+      {
+        text: "你对未来的看法更倾向于？",
+        options: [
+          "A. 关注实际可行的目标",
+          "B. 畅想各种可能性和理想状态"
+        ],
+        dimension: "SN",
+        value: [1, 0]
+      },
+      {
+        text: "在解决冲突时，你更倾向于？",
+        options: [
+          "A. 直接面对，寻找解决方案",
+          "B. 尽量避免，维持和谐"
+        ],
+        dimension: "TF",
+        value: [1, 0]
+      },
+      {
+        text: "你更擅长？",
+        options: [
+          "A. 执行计划，完成既定目标",
+          "B. 适应变化，灵活应对突发情况"
+        ],
+        dimension: "JP",
+        value: [1, 0]
+      },
+      {
+        text: "你更喜欢的工作环境是？",
+        options: [
+          "A. 充满活力和人际互动",
+          "B. 安静专注，较少打扰"
+        ],
+        dimension: "EI",
+        value: [1, 0]
+      },
+      {
+        text: "学习新技能时，你更关注？",
+        options: [
+          "A. 具体的应用方法和步骤",
+          "B. 背后的原理和整体框架"
+        ],
+        dimension: "SN",
+        value: [1, 0]
+      },
+      {
+        text: "做选择时，你更依赖？",
+        options: [
+          "A. 理性思考和分析",
+          "B. 直觉和内心感受"
+        ],
+        dimension: "TF",
+        value: [1, 0]
+      },
+      {
+        text: "对于最后期限，你通常会？",
+        options: [
+          "A. 提前完成，避免匆忙",
+          "B. 在截止前集中精力完成"
+        ],
+        dimension: "JP",
+        value: [1, 0]
+      },
+      {
+        text: "你认为自己更偏向于？",
+        options: [
+          "A. 外向，乐于表达自己",
+          "B. 内向，倾向于保留想法"
+        ],
+        dimension: "EI",
+        value: [1, 0]
+      },
+      {
+        text: "你对信息的偏好是？",
+        options: [
+          "A. 具体、实在、有用的",
+          "B. 抽象、创新、有潜力的"
+        ],
+        dimension: "SN",
+        value: [1, 0]
+      },
+      {
+        text: "在团队决策中，你更看重？",
+        options: [
+          "A. 决策的合理性和有效性",
+          "B. 团队成员的感受和共识"
+        ],
+        dimension: "TF",
+        value: [1, 0]
+      },
+      {
+        text: "你对生活的态度更倾向于？",
+        options: [
+          "A. 有规划，追求稳定",
+          "B. 顺其自然，享受过程"
+        ],
+        dimension: "JP",
+        value: [1, 0]
+      }
+    ];
+    
+    // 人格类型数据
+    const personalityTypes = {
+      "ISTJ": {
+        name: "检查官",
+        description: "你是一个认真、负责、可靠的人。你注重事实和细节，做事有条理，坚守承诺，是团队中可以信赖的成员。你喜欢清晰的结构和明确的规则，在执行任务时非常严谨。",
+        strengths: [
+          "责任心强，值得信赖",
+          "注重细节，做事严谨",
+          "有良好的组织能力",
+          "坚守原则和承诺"
+        ],
+        tags: ["可靠", "严谨", "务实", "有组织", "负责", "传统"],
+        funnyAdvice: "偶尔放松一下规则吧，生活中的惊喜往往来自计划之外！"
+      },
+      "ISFJ": {
+        name: "守卫者",
+        description: "你是一个温暖、体贴、有同情心的人。你非常关注他人的需求和感受，乐于帮助别人，常常把他人的利益放在自己之前。你重视和谐与稳定，善于记住细节并为他人着想。",
+        strengths: [
+          "富有同情心，关心他人",
+          "细致周到，善于照顾人",
+          "忠诚可靠，值得信赖",
+          "注重和谐与稳定"
+        ],
+        tags: ["体贴", "忠诚", "助人", "细心", "可靠", "友善"],
+        funnyAdvice: "别忘了照顾好自己，你不能把所有的温暖都给了别人，自己却冻着呀！"
+      },
+      "INFJ": {
+        name: "咨询师",
+        description: "你是一个富有洞察力、理想主义、有同理心的人。你对他人的内心世界有深刻的理解，常常能预见他人的需求和感受。你有强烈的价值观和理想，并致力于实现它们，帮助他人成长和发展。",
+        strengths: [
+          "富有洞察力和同理心",
+          "有强烈的价值观和理想",
+          "善于理解他人的内心",
+          "致力于帮助他人成长"
+        ],
+        tags: ["洞察", "理想", "同情", "创意", "深刻", "远见"],
+        funnyAdvice: "不是每个人都像你一样思考深刻，有时候简单直接反而更好！"
+      },
+      "INTJ": {
+        name: "策划者",
+        description: "你是一个独立、有远见、善于分析的人。你有强烈的好奇心和求知欲，喜欢探索复杂的问题并找到创新的解决方案。你自信且果断，善于制定长远计划并坚持执行，追求卓越和效率。",
+        strengths: [
+          "有远见，善于战略思考",
+          "分析能力强，逻辑清晰",
+          "独立自信，果断坚决",
+          "追求卓越，注重效率"
+        ],
+        tags: ["战略", "独立", "分析", "自信", "创新", "果断"],
+        funnyAdvice: "偶尔放下你的完美主义吧，有时候完成比完美更重要！"
+      },
+      "ISTP": {
+        name: "手艺人",
+        description: "你是一个务实、灵活、善于解决问题的人。你喜欢通过动手实践来学习和理解事物，对机械和技术有天然的兴趣。你冷静、理性，在危机时刻能保持镇定并找到实际的解决方案。",
+        strengths: [
+          "务实，注重实际效果",
+          "动手能力强，善于解决问题",
+          "冷静理性，应变能力强",
+          "灵活适应，注重效率"
+        ],
+        tags: ["务实", "灵活", "动手", "冷静", "理性", "解决"],
+        funnyAdvice: "有时候问题不需要立刻解决，停下来享受一下过程也不错！"
+      },
+      "ISFP": {
+        name: "艺术家",
+        description: "你是一个敏感、灵活、注重体验的人。你对美感和感官体验有敏锐的洞察力，喜欢通过艺术和创作表达自己。你重视个人价值观，善于适应环境，对他人的感受很敏感。",
+        strengths: [
+          "敏感细腻，有艺术天赋",
+          "灵活适应，注重当下",
+          "对他人感受敏感",
+          "重视个人价值观"
+        ],
+        tags: ["艺术", "敏感", "灵活", "体验", "和谐", "创造"],
+        funnyAdvice: "你的感受很重要，但也别让它们完全控制你的决定哦！"
+      },
+      "INFP": {
+        name: "调停者",
+        description: "你是理想主义者，充满创造力和洞察力。你对他人富有同情心，常常为了帮助别人而牺牲自己的利益。你重视和谐与真诚，讨厌冲突和虚伪，有强烈的个人价值观和理想。",
+        strengths: [
+          "富有创造力和想象力",
+          "对他人富有同情心和理解力",
+          "坚持自己的价值观和理想",
+          "善于发现事物的深层意义"
+        ],
+        tags: ["理想", "同情", "创造", "忠诚", "内向", "敏感"],
+        funnyAdvice: "记得偶尔从自己的理想世界中出来透透气，现实世界虽然不完美，但有披萨和Wi-Fi啊！"
+      },
+      "INTP": {
+        name: "逻辑学家",
+        description: "你是一个理性、好奇、善于分析的人。你对抽象概念和理论有浓厚的兴趣，喜欢探索事物的本质和规律。你独立思考，追求知识和理解，常常沉浸在自己的思维世界中。",
+        strengths: [
+          "逻辑思维能力强",
+          "好奇心强，求知欲旺盛",
+          "善于抽象思考和分析",
+          "独立思考，有独到见解"
+        ],
+        tags: ["逻辑", "好奇", "分析", "独立", "理性", "探索"],
+        funnyAdvice: "有时候过度分析会让你错过生活中的美好，放轻松，跟着感觉走一次吧！"
+      },
+      "ESTP": {
+        name: "创业者",
+        description: "你是一个精力充沛、务实、善于行动的人。你喜欢刺激和挑战，善于在现实世界中解决问题。你外向、友善，善于利用机会，喜欢活在当下，享受生活的乐趣。",
+        strengths: [
+          "务实，注重实际效果",
+          "行动迅速，善于抓住机会",
+          "外向友善，善于社交",
+          "应变能力强，适应力好"
+        ],
+        tags: ["务实", "行动", "社交", "灵活", "冒险", "活力"],
+        funnyAdvice: "偶尔放慢脚步思考一下长远后果，不是所有机会都值得抓住的！"
+      },
+      "ESFP": {
+        name: "表演者",
+        description: "你是一个热情、友善、善于交际的人。你喜欢和他人在一起，享受生活的乐趣，善于让周围的人感到快乐。你注重实际体验，活在当下，对新的事物充满好奇。",
+        strengths: [
+          "热情友善，善于交际",
+          "乐观开朗，能带动气氛",
+          "注重实际体验，活在当下",
+          "善于理解他人的需求"
+        ],
+        tags: ["热情", "社交", "乐观", "活泼", "体验", "友善"],
+        funnyAdvice: "你的活力很有感染力，但也要学会倾听，不是每次聚会都需要你成为焦点！"
+      },
+      "ENFP": {
+        name: "追梦人",
+        description: "你是一个热情、富有创造力、充满活力的人。你对生活充满好奇和热情，善于发现事物的可能性和潜力。你对他人富有同情心，善于激励和启发他人，有强烈的价值观和理想。",
+        strengths: [
+          "热情洋溢，富有创造力",
+          "善于激励和启发他人",
+          "对可能性有敏锐的洞察力",
+          "富有同情心，关心他人"
+        ],
+        tags: ["热情", "创造", "理想", "激励", "好奇", "乐观"],
+        funnyAdvice: "你的想法很多，但别忘了落地执行，否则它们永远只是梦想！"
+      },
+      "ENTP": {
+        name: "辩论家",
+        description: "你是一个聪明、好奇、善于辩论的人。你喜欢挑战传统观念，探索新的想法和可能性。你机智、灵活，善于发现问题并提出创新的解决方案，享受智力上的挑战。",
+        strengths: [
+          "聪明机智，善于辩论",
+          "好奇心强，喜欢探索新想法",
+          "创新思维，善于解决复杂问题",
+          "灵活适应，应变能力强"
+        ],
+        tags: ["聪明", "辩论", "好奇", "创新", "灵活", "挑战"],
+        funnyAdvice: "不是每个想法都需要被辩论到赢，有时候倾听和理解比证明自己正确更重要！"
+      },
+      "ESTJ": {
+        name: "管理者",
+        description: "你是一个务实、果断、有组织能力的人。你善于制定计划和规则，并确保它们得到执行。你重视效率和结果，有强烈的责任感和领导力，善于管理和组织团队完成任务。",
+        strengths: [
+          "组织能力强，善于管理",
+          "务实果断，注重效率",
+          "有强烈的责任感和领导力",
+          "善于制定和执行计划"
+        ],
+        tags: ["管理", "果断", "务实", "组织", "负责", "高效"],
+        funnyAdvice: "偶尔放松一下你的控制欲吧，不是所有事情都需要按计划进行的！"
+      },
+      "ESFJ": {
+        name: "东道主",
+        description: "你是一个热情、友善、善于社交的人。你非常关注他人的需求和感受，乐于帮助别人，善于创造和谐的氛围。你重视传统和规则，有强烈的责任感，善于组织社交活动。",
+        strengths: [
+          "热情友善，善于社交",
+          "关心他人，乐于助人",
+          "有强烈的责任感",
+          "善于创造和谐的氛围"
+        ],
+        tags: ["友善", "社交", "助人", "负责", "和谐", "组织"],
+        funnyAdvice: "照顾别人的同时别忘了自己的需求，你不可能让所有人都满意！"
+      },
+      "ENFJ": {
+        name: "教育家",
+        description: "你是一个热情、有同理心、善于激励他人的人。你对他人的成长和发展有强烈的兴趣，善于理解他人的需求和潜力，并帮助他们实现目标。你有强烈的价值观和理想，善于领导和组织团队。",
+        strengths: [
+          "富有同理心，善于理解他人",
+          "善于激励和帮助他人成长",
+          "有强烈的价值观和理想",
+          "优秀的领导和组织能力"
+        ],
+        tags: ["激励", "同情", "领导", "理想", "组织", "热情"],
+        funnyAdvice: "你不能拯救所有人，有时候人们需要自己经历挫折才能成长！"
+      },
+      "ENTJ": {
+        name: "指挥官",
+        description: "你是一个自信、果断、有领导力的人。你善于制定长远计划和战略，有强烈的目标感和决心，能够有效地组织和领导团队实现目标。你理性、高效，喜欢挑战和竞争。",
+        strengths: [
+          "领导力强，善于战略规划",
+          "自信果断，目标明确",
+          "理性高效，善于组织",
+          "勇于接受挑战和竞争"
+        ],
+        tags: ["领导", "果断", "战略", "自信", "高效", "挑战"],
+        funnyAdvice: "不是所有人都像你一样有野心，学会欣赏不同节奏的生活吧！"
+      }
+    };
+    
+    // 测试功能
+    function setupTest() {
+      let currentQuestion = 0;
+      let answers = {};
+      let results = {
+        EI: 0,
+        SN: 0,
+        TF: 0,
+        JP: 0
+      };
+      let username = ''; // 存储用户名
+      
+      // DOM元素
+      const testIntro = document.getElementById('test-intro');
+      const testContainer = document.getElementById('test-container');
+      const resultForm = document.getElementById('result-form');
+      const testResult = document.getElementById('test-result');
+      const startTestBtn = document.getElementById('start-test');
+      const continueTestBtn = document.getElementById('continue-test');
+      const questionNumber = document.getElementById('question-number');
+      const questionText = document.getElementById('question-text');
+      const answersContainer = document.getElementById('answers-container');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      const circleProgress = document.getElementById('circle-progress');
+      const circlePercentage = document.getElementById('circle-percentage');
+      const submitResultBtn = document.getElementById('submit-result');
+      const retakeTestBtn = document.getElementById('retake-test');
+      const backHomeBtn = document.getElementById('back-home');
+      const resultTitle = document.getElementById('result-title'); // 结果标题元素
+      
+      // 检查是否有保存的进度
+      function checkSavedProgress() {
+        const savedAnswers = localStorage.getItem('mbtiAnswers');
+        const savedQuestion = localStorage.getItem('mbtiCurrentQuestion');
+        
+        if (savedAnswers && savedQuestion) {
+          answers = JSON.parse(savedAnswers);
+          currentQuestion = parseInt(savedQuestion);
+          continueTestBtn.classList.remove('hidden');
+        }
+      }
+      
+      // 保存进度
+      function saveProgress() {
+        localStorage.setItem('mbtiAnswers', JSON.stringify(answers));
+        localStorage.setItem('mbtiCurrentQuestion', currentQuestion.toString());
+      }
+      
+      // 清除保存的进度
+      function clearProgress() {
+        localStorage.removeItem('mbtiAnswers');
+        localStorage.removeItem('mbtiCurrentQuestion');
+        continueTestBtn.classList.add('hidden');
+      }
+      
+      // 更新进度显示
+      function updateProgress() {
+        const progress = ((currentQuestion) / questions.length) * 100;
+        const percentage = Math.round(progress);
+        
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `${currentQuestion}/${questions.length}`;
+        circlePercentage.textContent = `${percentage}%`;
+        
+        // 更新环形进度条
+        const circumference = 2 * Math.PI * 45; // 2πr
+        const offset = circumference - (progress / 100) * circumference;
+        circleProgress.style.strokeDashoffset = offset;
+      }
+      
+      // 加载当前问题
+      function loadQuestion() {
+        if (currentQuestion >= 0 && currentQuestion < questions.length) {
+          const question = questions[currentQuestion];
+          
+          questionNumber.textContent = `问题 ${currentQuestion + 1}/${questions.length}`;
+          questionText.textContent = question.text;
+          
+          // 清空答案容器
+          answersContainer.innerHTML = '';
+          
+          // 添加答案选项
+          question.options.forEach((option, index) => {
+            const answerDiv = document.createElement('div');
+            answerDiv.className = 'answer-option p-4 border border-gray-200 rounded-xl hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all';
+            answerDiv.dataset.index = index;
+            
+            // 检查是否有保存的答案
+            if (answers[currentQuestion] === index) {
+              answerDiv.classList.add('border-primary', 'bg-primary/5');
+            }
+            
+            answerDiv.innerHTML = `
+              <label class="flex items-start gap-3 cursor-pointer">
+                <div class="mt-1 w-5 h-5 rounded-full border-2 ${answers[currentQuestion] === index ? 'border-primary bg-primary/20' : 'border-gray-300'} flex-shrink-0 answer-radio ${answers[currentQuestion] === index ? 'after:content-[""] after:block after:w-3 after:h-3 after:rounded-full after:bg-primary after:ml-1 after:mt-1' : ''}"></div>
+                <span>${option}</span>
+              </label>
+            `;
+            
+            answerDiv.addEventListener('click', () => {
+              // 移除其他选项的选中状态
+              document.querySelectorAll('.answer-option').forEach(el => {
+                el.classList.remove('border-primary', 'bg-primary/5');
+                el.querySelector('.answer-radio').classList.remove('border-primary', 'bg-primary/20');
+                el.querySelector('.answer-radio').classList.add('border-gray-300');
+                el.querySelector('.answer-radio').classList.remove('after:content-[""]', 'after:block', 'after:w-3', 'after:h-3', 'after:rounded-full', 'after:bg-primary', 'after:ml-1', 'after:mt-1');
+              });
+              
+              // 设置当前选项为选中状态
+              answerDiv.classList.add('border-primary', 'bg-primary/5');
+              answerDiv.querySelector('.answer-radio').classList.remove('border-gray-300');
+              answerDiv.querySelector('.answer-radio').classList.add('border-primary', 'bg-primary/20');
+              answerDiv.querySelector('.answer-radio').classList.add('after:content-[""]', 'after:block', 'after:w-3', 'after:h-3', 'after:rounded-full', 'after:bg-primary', 'after:ml-1', 'after:mt-1');
+              
+              // 保存答案
+              answers[currentQuestion] = index;
+              saveProgress();
+            });
+            
+            answersContainer.appendChild(answerDiv);
+          });
+          
+          // 更新导航按钮状态
+          if (currentQuestion === 0) {
+            prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+          } else {
+            prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
+          
+          if (currentQuestion === questions.length - 1) {
+            nextBtn.textContent = '完成测试';
+            nextBtn.innerHTML = '完成测试 <i class="fa fa-check ml-2"></i>';
+          } else {
+            nextBtn.textContent = '下一题';
+            nextBtn.innerHTML = '下一题 <i class="fa fa-arrow-right ml-2"></i>';
+          }
+          
+          updateProgress();
+        }
+      }
+      
+      // 计算测试结果
+      function calculateResult() {
+        // 重置结果
+        results = {
+          EI: 0,
+          SN: 0,
+          TF: 0,
+          JP: 0
+        };
+        
+        // 计算每个维度的得分
+        for (let i = 0; i < questions.length; i++) {
+          const question = questions[i];
+          const answer = answers[i];
+          
+          if (answer !== undefined) {
+            results[question.dimension] += question.value[answer];
+          }
+        }
+        
+        // 确定每个维度的倾向
+        const EIType = results.EI > questions.filter(q => q.dimension === 'EI').length / 2 ? 'E' : 'I';
+        const SNType = results.SN > questions.filter(q => q.dimension === 'SN').length / 2 ? 'S' : 'N';
+        const TFType = results.TF > questions.filter(q => q.dimension === 'TF').length / 2 ? 'T' : 'F';
+        const JPType = results.JP > questions.filter(q => q.dimension === 'JP').length / 2 ? 'J' : 'P';
+        
+        return EIType + SNType + TFType + JPType;
+      }
+      
+      // 显示测试结果
+      function displayResult() {
+        const type = calculateResult();
+        const personality = personalityTypes[type];
+        
+        if (personality) {
+          // 使用用户输入的姓名更新结果标题
+          resultTitle.textContent = `${username}的MBTI性格类型是`;
+          
+          document.getElementById('personality-type').textContent = type;
+          document.getElementById('personality-name').textContent = personality.name;
+          document.getElementById('personality-description').textContent = personality.description;
+          
+          // 生成优势列表
+          const strengthsList = document.getElementById('personality-strengths');
+          strengthsList.innerHTML = '';
+          personality.strengths.forEach(strength => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start';
+            li.innerHTML = `
+              <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+              <span>${strength}</span>
+            `;
+            strengthsList.appendChild(li);
+          });
+          
+          // 生成标签
+          const tagsContainer = document.getElementById('personality-tags');
+          tagsContainer.innerHTML = '';
+          personality.tags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'bg-primary/10 text-primary px-3 py-1 rounded-full text-sm';
+            span.textContent = tag;
+            tagsContainer.appendChild(span);
+          });
+          
+          document.getElementById('funny-advice').textContent = personality.funnyAdvice;
+        }
+        
+        // 显示结果区域
+        resultForm.classList.add('hidden');
+        testResult.classList.remove('hidden');
+        
+        // 触发彩纸效果
+        createConfetti();
+      }
+      
+      // 开始测试
+      function startTest() {
+        testIntro.classList.add('hidden');
+        testContainer.classList.remove('hidden');
+        currentQuestion = 0;
+        answers = {};
+        loadQuestion();
+        
+        // 滚动到测试区域
+        document.getElementById('test').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      
+      // 继续测试
+      function continueTest() {
+        testIntro.classList.add('hidden');
+        testContainer.classList.remove('hidden');
+        loadQuestion();
+        
+        // 滚动到测试区域
+        document.getElementById('test').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      
+      // 上一题
+      function prevQuestion() {
+        if (currentQuestion > 0) {
+          currentQuestion--;
+          loadQuestion();
+        }
+      }
+      
+      // 下一题
+      function nextQuestion() {
+        // 检查是否回答了当前问题
+        if (answers[currentQuestion] === undefined) {
+          showNotification('请先回答当前问题', '信息', 'info');
+          return;
+        }
+        
+        if (currentQuestion < questions.length - 1) {
+          currentQuestion++;
+          loadQuestion();
+        } else {
+          // 完成测试，显示结果表单
+          testContainer.classList.add('hidden');
+          resultForm.classList.remove('hidden');
+        }
+      }
+      
+      // 提交结果
+      function submitResult() {
+        username = document.getElementById('username').value.trim(); // 获取并保存用户名
+        const email = document.getElementById('email').value.trim();
+        let isValid = true;
+        
+        // 验证昵称
+        if (username === '') {
+          showError('username', '昵称不能为空');
+          isValid = false;
+        } else {
+          hideError('username');
+        }
+        
+        // 验证邮箱（如果填写）
+        if (email !== '' && !isValidEmail(email)) {
+          showError('email', '请输入有效的邮箱地址');
+          isValid = false;
+        } else {
+          hideError('email');
+        }
+        
+        if (isValid) {
+          // 显示加载动画
+          showLoader();
+          
+          // 模拟提交
+          setTimeout(() => {
+            hideLoader();
+            displayResult();
+            clearProgress();
+          }, 1500);
+        }
+      }
+      
+      // 重新测试
+      function retakeTest() {
+        testResult.classList.add('hidden');
+        username = ''; // 重置用户名
+        startTest();
+      }
+      
+      // 返回首页
+      function backHome() {
+        testResult.classList.add('hidden');
+        username = ''; // 重置用户名
+        testIntro.classList.remove('hidden');
+        document.getElementById('home').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      
+      // 事件监听
+      startTestBtn.addEventListener('click', startTest);
+      continueTestBtn.addEventListener('click', continueTest);
+      prevBtn.addEventListener('click', prevQuestion);
+      nextBtn.addEventListener('click', nextQuestion);
+      submitResultBtn.addEventListener('click', submitResult);
+      retakeTestBtn.addEventListener('click', retakeTest);
+      backHomeBtn.addEventListener('click', backHome);
+      
+      // 键盘导航
+      document.addEventListener('keydown', (e) => {
+        if (testContainer.classList.contains('hidden') && resultForm.classList.contains('hidden')) {
+          return;
+        }
+        
+        // 左箭头或A键 - 上一题
+        if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+          if (currentQuestion > 0) {
+            prevQuestion();
+          }
+        }
+        
+        // 右箭头或D键 - 下一题/完成
+        if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
+          if (currentQuestion < questions.length) {
+            nextQuestion();
+          }
+        }
+        
+        // 数字1或A键 - 选择第一个选项
+        if (e.key === '1' || e.key.toLowerCase() === 'q') {
+          const firstOption = document.querySelector('.answer-option[data-index="0"]');
+          if (firstOption) {
+            firstOption.click();
+          }
+        }
+        
+        // 数字2或B键 - 选择第二个选项
+        if (e.key === '2' || e.key.toLowerCase() === 'w') {
+          const secondOption = document.querySelector('.answer-option[data-index="1"]');
+          if (secondOption) {
+            secondOption.click();
+          }
+        }
+        
+        // 回车键 - 下一题/完成
+        if (e.key === 'Enter') {
+          nextQuestion();
+        }
+      });
+      
+      // 初始化检查保存的进度
+      checkSavedProgress();
+    }
+    
+    // 联系表单功能
+    function setupContactForm() {
+      const contactName = document.getElementById('contact-name');
+      const contactEmail = document.getElementById('contact-email');
+      const contactMessage = document.getElementById('contact-message');
+      const charCount = document.getElementById('char-count');
+      const submitContactBtn = document.getElementById('submit-contact');
+      
+      // 字符计数
+      contactMessage.addEventListener('input', () => {
+        const length = contactMessage.value.length;
+        charCount.textContent = length;
+        
+        if (length > 500) {
+          charCount.classList.add('text-danger');
+        } else {
+          charCount.classList.remove('text-danger');
+        }
+      });
+      
+      // 提交表单
+      submitContactBtn.addEventListener('click', () => {
+        const name = contactName.value.trim();
+        const email = contactEmail.value.trim();
+        const message = contactMessage.value.trim();
+        let isValid = true;
+        
+        // 验证姓名
+        if (name === '') {
+          showError('contact-name', '姓名不能为空');
+          isValid = false;
+        } else {
+          hideError('contact-name');
+        }
+        
+        // 验证邮箱
+        if (email === '') {
+          showError('contact-email', '邮箱不能为空');
+          isValid = false;
+        } else if (!isValidEmail(email)) {
+          showError('contact-email', '请输入有效的邮箱地址');
+          isValid = false;
+        } else {
+          hideError('contact-email');
+        }
+        
+        // 验证留言
+        if (message === '') {
+          showError('contact-message', '留言不能为空');
+          isValid = false;
+        } else if (message.length > 500) {
+          showError('contact-message', '留言不能超过500个字符');
+          isValid = false;
+        } else {
+          hideError('contact-message');
+        }
+        
+        if (isValid) {
+          // 显示加载动画
+          showLoader();
+          
+          // 模拟提交
+          setTimeout(() => {
+            hideLoader();
+            
+            // 显示成功弹窗
+            showSubmitModal(
+              '提交成功', 
+              '感谢你的留言，我们会尽快回复你！', 
+              'success'
+            );
+            
+            // 重置表单
+            contactName.value = '';
+            contactEmail.value = '';
+            contactMessage.value = '';
+            charCount.textContent = '0';
+          }, 1500);
+        }
+      });
+    }
+    
+    // 订阅功能
+    function setupSubscribe() {
+      const subscribeEmail = document.getElementById('subscribe-email');
+      const subscribeBtn = document.getElementById('subscribe-btn');
+      
+      subscribeBtn.addEventListener('click', () => {
+        const email = subscribeEmail.value.trim();
+        
+        if (email === '') {
+          showNotification('请输入你的邮箱地址', '错误', 'error');
+        } else if (!isValidEmail(email)) {
+          showNotification('请输入有效的邮箱地址', '错误', 'error');
+        } else {
+          // 显示加载动画
+          showLoader();
+          
+          // 模拟提交
+          setTimeout(() => {
+            hideLoader();
+            showNotification('订阅成功！我们会定期发送MBTI相关资讯', '成功', 'success');
+            subscribeEmail.value = '';
+          }, 1500);
+        }
+      });
+      
+      // 按回车提交
+      subscribeEmail.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          subscribeBtn.click();
+        }
+      });
+    }
+    
+    // 复制链接功能
+    function setupCopyLink() {
+      const copyLinkBtn = document.getElementById('copy-link');
+      
+      copyLinkBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          showNotification('链接已复制到剪贴板', '成功', 'success');
+        }).catch(() => {
+          showNotification('复制失败，请手动复制链接', '错误', 'error');
+        });
+      });
+    }
+    
+    // 通知功能
+    function showNotification(message, title = '提示', type = 'info') {
+      const notification = document.getElementById('notification');
+      const notificationTitle = document.getElementById('notification-title');
+      const notificationMessage = document.getElementById('notification-message');
+      const notificationIcon = document.getElementById('notification-icon');
+      
+      // 设置通知内容
+      notificationTitle.textContent = title;
+      notificationMessage.textContent = message;
+      
+      // 设置通知图标
+      notificationIcon.className = '';
+      if (type === 'success') {
+        notificationIcon.className = 'w-8 h-8 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0';
+        notificationIcon.innerHTML = '<i class="fa fa-check text-success"></i>';
+      } else if (type === 'error') {
+        notificationIcon.className = 'w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center flex-shrink-0';
+        notificationIcon.innerHTML = '<i class="fa fa-times text-danger"></i>';
+      } else {
+        notificationIcon.className = 'w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0';
+        notificationIcon.innerHTML = '<i class="fa fa-info text-primary"></i>';
+      }
+      
+      // 显示通知
+      notification.classList.remove('translate-x-full', 'opacity-0');
+      notification.classList.add('translate-x-0', 'opacity-100');
+      
+      // 3秒后自动关闭
+      const timeout = setTimeout(hideNotification, 3000);
+      
+      // 手动关闭
+      document.getElementById('close-notification').addEventListener('click', () => {
+        clearTimeout(timeout);
+        hideNotification();
+      });
+    }
+    
+    function hideNotification() {
+      const notification = document.getElementById('notification');
+      notification.classList.remove('translate-x-0', 'opacity-100');
+      notification.classList.add('translate-x-full', 'opacity-0');
+    }
+    
+    // 提交模拟弹窗
+    function showSubmitModal(title, message, type = 'success') {
+      const modal = document.getElementById('submit-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMessage = document.getElementById('modal-message');
+      const modalIcon = document.getElementById('modal-icon');
+      const modalIconContainer = document.getElementById('modal-icon-container');
+      
+      // 设置弹窗内容
+      modalTitle.textContent = title;
+      modalMessage.textContent = message;
+      
+      // 设置弹窗图标
+      if (type === 'success') {
+        modalIconContainer.className = 'w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6';
+        modalIcon.className = 'fa fa-check text-success text-2xl';
+      } else if (type === 'error') {
+        modalIconContainer.className = 'w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-6';
+        modalIcon.className = 'fa fa-times text-danger text-2xl';
+      } else {
+        modalIconContainer.className = 'w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6';
+        modalIcon.className = 'fa fa-info text-primary text-2xl';
+      }
+      
+      // 显示弹窗
+      modal.classList.remove('opacity-0', 'invisible');
+      modal.classList.add('opacity-100', 'visible');
+      
+      setTimeout(() => {
+        modal.querySelector('div').classList.remove('scale-95');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+      
+      // 关闭按钮
+      document.getElementById('close-modal').addEventListener('click', hideSubmitModal);
+      
+      // 点击外部关闭
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          hideSubmitModal();
+        }
+      });
+    }
+    
+    function hideSubmitModal() {
+      const modal = document.getElementById('submit-modal');
+      modal.querySelector('div').classList.remove('scale-100');
+      modal.querySelector('div').classList.add('scale-95');
+      
+      setTimeout(() => {
+        modal.classList.remove('opacity-100', 'visible');
+        modal.classList.add('opacity-0', 'invisible');
+      }, 300);
+    }
+    
+    // 加载动画
+    function showLoader() {
+      const loader = document.getElementById('loader');
+      loader.classList.remove('opacity-0', 'invisible');
+      loader.classList.add('opacity-100', 'visible');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function hideLoader() {
+      const loader = document.getElementById('loader');
+      loader.classList.remove('opacity-100', 'visible');
+      loader.classList.add('opacity-0', 'invisible');
+      document.body.style.overflow = '';
+    }
+    
+    // 彩纸效果
+    function createConfetti() {
+      const container = document.getElementById('confetti-container');
+      container.innerHTML = ''; // 清空现有彩纸
+      
+      const colors = ['#7C3AED', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+      const count = 150;
+      
+      for (let i = 0; i < count; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        
+        // 随机颜色
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        // 随机大小
+        const size = Math.random() * 10 + 5;
+        confetti.style.width = `${size}px`;
+        confetti.style.height = `${size}px`;
+        
+        // 随机位置
+        confetti.style.left = `${Math.random() * 100}%`;
+        
+        // 随机旋转
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        
+        // 随机动画延迟和持续时间
+        confetti.style.animationDelay = `${Math.random() * 5}s`;
+        confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        
+        container.appendChild(confetti);
+      }
+    }
+    
+    // 工具函数：验证邮箱
+    function isValidEmail(email) {
+      const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(email);
+    }
+    
+    // 工具函数：显示错误信息
+    function showError(elementId, message) {
+      const element = document.getElementById(elementId);
+      const errorElement = element.nextElementSibling;
+      
+      if (errorElement && errorElement.classList.contains('error-message')) {
+        errorElement.textContent = `\uF06A ${message}`; // 使用Font Awesome图标
+        errorElement.classList.remove('hidden');
+      }
+      
+      element.classList.add('border-danger');
+      element.classList.remove('border-gray-200', 'focus:border-primary');
+    }
+    
+    // 工具函数：隐藏错误信息
+    function hideError(elementId) {
+      const element = document.getElementById(elementId);
+      const errorElement = element.nextElementSibling;
+      
+      if (errorElement && errorElement.classList.contains('error-message')) {
+        errorElement.classList.add('hidden');
+      }
+      
+      element.classList.remove('border-danger');
+      element.classList.add('border-gray-200', 'focus:border-primary');
+    }
+    
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      createStars();
+      setupMobileMenu();
+      setupSmoothScroll();
+      setupTest();
+      setupContactForm();
+      setupSubscribe();
+      setupCopyLink();
+      
+      // 滚动监听
+      window.addEventListener('scroll', handleNavbarScroll);
+    });
+  </script>
+</body>
+</html>
