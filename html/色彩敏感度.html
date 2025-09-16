@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色彩敏感度挑战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366F1',
+                        secondary: '#EC4899',
+                        accent: '#8B5CF6',
+                        neutral: '#1F2937',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .backdrop-blur-sm {
+                backdrop-filter: blur(4px);
+            }
+            .transition-transform {
+                transition-property: transform;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+                transition-duration: 300ms;
+            }
+            .scale-up {
+                transform: scale(1.05);
+            }
+            .pulse-effect {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            @keyframes pulse {
+                0%, 100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.7;
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans text-neutral">
+    <!-- 页面头部 -->
+    <header class="container mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center space-x-3 mb-4 md:mb-0">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                <i class="fa fa-eyedropper text-white text-xl"></i>
+            </div>
+            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">色彩敏感度挑战</h1>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <div class="bg-white rounded-xl shadow-md p-3 flex items-center space-x-2">
+                <i class="fa fa-trophy text-yellow-500 text-xl"></i>
+                <div>
+                    <p class="text-xs text-gray-500">得分</p>
+                    <p id="score" class="text-lg font-bold">0</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-3 flex items-center space-x-2">
+                <i class="fa fa-clock-o text-blue-500 text-xl"></i>
+                <div>
+                    <p class="text-xs text-gray-500">用时</p>
+                    <p id="timer" class="text-lg font-bold">00:00</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-3 flex items-center space-x-2">
+                <i class="fa fa-signal text-green-500 text-xl"></i>
+                <div>
+                    <p class="text-xs text-gray-500">难度</p>
+                    <p id="difficulty" class="text-lg font-bold">1</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主游戏区域 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 游戏开始界面 -->
+        <div id="start-screen" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div class="mb-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                    <i class="fa fa-paint-brush text-white text-3xl"></i>
+                </div>
+                <h2 class="text-[clamp(1.25rem,2vw,1.75rem)] font-bold mb-3">测试你的色彩感知力</h2>
+                <p class="text-gray-600 mb-6">在相似的色块中找出那个与众不同的颜色，挑战你的视觉极限！</p>
+                
+                <!-- 色彩差异示例 -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3">色彩差异示例</h3>
+                    <div class="flex justify-center space-x-2">
+                        <div class="w-16 h-16 rounded-md bg-[#FF6B6B]" data-color="#FF6B6B"></div>
+                        <div class="w-16 h-16 rounded-md bg-[#FF7B7B]" data-color="#FF7B7B"></div>
+                        <div class="w-16 h-16 rounded-md bg-[#FF8C8C]" data-color="#FF8C8C"></div>
+                        <div class="w-16 h-16 rounded-md bg-[#FF9D9D]" data-color="#FF9D9D"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">随着难度增加，差异会变得越来越小</p>
+                </div>
+            </div>
+            
+            <button id="start-button" class="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center mx-auto">
+                <i class="fa fa-play mr-2"></i> 开始挑战
+            </button>
+        </div>
+
+        <!-- 游戏界面 (初始隐藏) -->
+        <div id="game-screen" class="hidden">
+            <!-- 游戏说明 -->
+            <div class="bg-white rounded-xl shadow-md p-4 mb-6 max-w-2xl mx-auto">
+                <p class="text-center text-gray-700"><i class="fa fa-info-circle text-primary mr-2"></i> 找出与其他色块不同的那一个，难度会随着你的正确选择而增加</p>
+            </div>
+            
+            <!-- 色块网格 -->
+            <div id="color-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8">
+                <!-- 色块将通过JavaScript动态生成 -->
+            </div>
+            
+            <!-- 控制按钮 -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button id="restart-button" class="bg-white hover:bg-gray-50 text-neutral border border-gray-300 font-medium py-2 px-6 rounded-full shadow-sm flex items-center transition-all duration-300">
+                    <i class="fa fa-refresh mr-2"></i> 重新开始
+                </button>
+                <button id="hint-button" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-medium py-2 px-6 rounded-full shadow-sm flex items-center transition-all duration-300">
+                    <i class="fa fa-lightbulb-o mr-2"></i> 提示 <span id="hints-left" class="ml-1 bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">3</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 结果界面 (初始隐藏) -->
+        <div id="result-screen" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div class="mb-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center">
+                    <i class="fa fa-trophy text-white text-3xl"></i>
+                </div>
+                <h2 class="text-[clamp(1.25rem,2vw,1.75rem)] font-bold mb-3">挑战完成！</h2>
+                <p class="text-gray-600 mb-2">你的成绩</p>
+                
+                <div class="grid grid-cols-2 gap-4 mt-6 mb-8">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-sm text-gray-500">总得分</p>
+                        <p id="final-score" class="text-2xl font-bold text-primary">0</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-sm text-gray-500">用时</p>
+                        <p id="final-time" class="text-2xl font-bold text-blue-500">00:00</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-sm text-gray-500">最高难度</p>
+                        <p id="final-difficulty" class="text-2xl font-bold text-green-500">1</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-sm text-gray-500">准确率</p>
+                        <p id="accuracy" class="text-2xl font-bold text-amber-500">0%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <button id="play-again-button" class="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center">
+                    <i class="fa fa-play-circle mr-2"></i> 再玩一次
+                </button>
+                <button id="share-button" class="bg-white hover:bg-gray-50 text-neutral border border-gray-300 font-medium py-3 px-8 rounded-full shadow-sm flex items-center justify-center transition-all duration-300">
+                    <i class="fa fa-share-alt mr-2"></i> 分享成绩
+                </button>
+            </div>
+        </div>
+
+        <!-- 色彩差异可视化 -->
+        <div id="difference-explanation" class="hidden bg-white rounded-xl shadow-md p-4 mb-8 max-w-2xl mx-auto">
+            <h3 class="text-lg font-semibold mb-3 flex items-center">
+                <i class="fa fa-palette text-primary mr-2"></i> 色彩差异说明
+            </h3>
+            <div class="flex items-center justify-center mb-4">
+                <div class="w-20 h-20 rounded-md mr-4" id="original-color"></div>
+                <div class="flex flex-col items-center">
+                    <i class="fa fa-arrow-right text-gray-400 mb-2"></i>
+                    <div class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">差异</div>
+                </div>
+                <div class="w-20 h-20 rounded-md ml-4" id="different-color"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div>
+                    <p class="text-gray-500">红色</p>
+                    <p id="red-diff" class="font-semibold">+0</p>
+                </div>
+                <div>
+                    <p class="text-gray-500">绿色</p>
+                    <p id="green-diff" class="font-semibold">+0</p>
+                </div>
+                <div>
+                    <p class="text-gray-500">蓝色</p>
+                    <p id="blue-diff" class="font-semibold">+0</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="container mx-auto px-4 py-6 text-center text-gray-500 text-sm">
+        <p>© 2025 色彩敏感度挑战 | 为艺术生设计</p>
+    </footer>
+
+    <!-- 成功提示弹窗 -->
+    <div id="success-toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center opacity-0 transition-opacity duration-500 z-50">
+        <i class="fa fa-check-circle mr-2"></i>
+        <span>正确！继续挑战</span>
+    </div>
+
+    <!-- 失败提示弹窗 -->
+    <div id="error-toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center opacity-0 transition-opacity duration-500 z-50">
+        <i class="fa fa-times-circle mr-2"></i>
+        <span>错误！再试一次</span>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            score: 0,
+            time: 0,
+            difficulty: 1,
+            hints: 3,
+            startTime: 0,
+            timerInterval: null,
+            gridSize: 4,
+            correctPosition: 0,
+            originalColor: '',
+            differentColor: '',
+            gameActive: false,
+            totalAttempts: 0,
+            correctAttempts: 0
+        };
+
+        // DOM元素
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const hintButton = document.getElementById('hint-button');
+        const playAgainButton = document.getElementById('play-again-button');
+        const shareButton = document.getElementById('share-button');
+        const colorGrid = document.getElementById('color-grid');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const difficultyDisplay = document.getElementById('difficulty');
+        const hintsLeftDisplay = document.getElementById('hints-left');
+        const successToast = document.getElementById('success-toast');
+        const errorToast = document.getElementById('error-toast');
+        const differenceExplanation = document.getElementById('difference-explanation');
+        const originalColorDisplay = document.getElementById('original-color');
+        const differentColorDisplay = document.getElementById('different-color');
+        const redDiffDisplay = document.getElementById('red-diff');
+        const greenDiffDisplay = document.getElementById('green-diff');
+        const blueDiffDisplay = document.getElementById('blue-diff');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const finalTimeDisplay = document.getElementById('final-time');
+        const finalDifficultyDisplay = document.getElementById('final-difficulty');
+        const accuracyDisplay = document.getElementById('accuracy');
+
+        // 事件监听器
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', restartGame);
+        hintButton.addEventListener('click', useHint);
+        playAgainButton.addEventListener('click', restartGame);
+        shareButton.addEventListener('click', shareResult);
+
+        // 开始游戏
+        function startGame() {
+            gameState.score = 0;
+            gameState.time = 0;
+            gameState.difficulty = 1;
+            gameState.hints = 3;
+            gameState.totalAttempts = 0;
+            gameState.correctAttempts = 0;
+            gameState.gameActive = true;
+            
+            updateDisplay();
+            generateColorGrid();
+            
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            resultScreen.classList.add('hidden');
+            differenceExplanation.classList.add('hidden');
+            
+            gameState.startTime = Date.now();
+            gameState.timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            clearInterval(gameState.timerInterval);
+            startGame();
+        }
+
+        // 游戏结束
+        function endGame() {
+            gameState.gameActive = false;
+            clearInterval(gameState.timerInterval);
+            
+            // 更新结果显示
+            finalScoreDisplay.textContent = gameState.score;
+            finalTimeDisplay.textContent = formatTime(gameState.time);
+            finalDifficultyDisplay.textContent = gameState.difficulty - 1;
+            
+            const accuracy = gameState.totalAttempts > 0 
+                ? Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100) 
+                : 0;
+            accuracyDisplay.textContent = `${accuracy}%`;
+            
+            gameScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            differenceExplanation.classList.add('hidden');
+        }
+
+        // 使用提示
+        function useHint() {
+            if (gameState.hints <= 0 || !gameState.gameActive) return;
+            
+            gameState.hints--;
+            hintsLeftDisplay.textContent = gameState.hints;
+            
+            // 闪烁不同的色块几次
+            const differentTile = colorGrid.children[gameState.correctPosition];
+            let flashCount = 0;
+            const maxFlashes = 3;
+            
+            const flashInterval = setInterval(() => {
+                if (flashCount >= maxFlashes * 2) {
+                    clearInterval(flashInterval);
+                    differentTile.classList.remove('opacity-50');
+                    return;
+                }
+                
+                if (flashCount % 2 === 0) {
+                    differentTile.classList.add('opacity-50');
+                } else {
+                    differentTile.classList.remove('opacity-50');
+                }
+                
+                flashCount++;
+            }, 200);
+        }
+
+        // 分享结果
+        function shareResult() {
+            // 这里只是模拟分享功能
+            alert('成绩已复制到剪贴板！');
+        }
+
+        // 生成随机颜色
+        function generateRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // 生成与原颜色略有不同的颜色
+        function generateDifferentColor(originalColor, difficulty) {
+            // 解析RGB值
+            const rgb = originalColor.match(/\d+/g).map(Number);
+            
+            // 根据难度调整差异大小 - 进一步增大初始差异，减缓难度增长
+            // 难度1: 差异25-35; 难度5: 差异18-28; 难度10: 差异10-20; 难度20: 差异5-15
+            const maxDiff = 35 - (difficulty * difficulty * 0.05);
+            const minDiff = 5 + (difficulty * 0.5);
+            
+            // 确保差异在合理范围内
+            const clampedMaxDiff = Math.max(minDiff + 1, Math.min(35, maxDiff));
+            
+            // 随机选择一个通道进行修改
+            const channel = Math.floor(Math.random() * 3);
+            let diff = Math.floor(Math.random() * (clampedMaxDiff - minDiff + 1)) + minDiff;
+            
+            // 随机决定是增加还是减少
+            if (Math.random() > 0.5) diff = -diff;
+            
+            // 创建新的颜色
+            const newRgb = [...rgb];
+            newRgb[channel] = Math.max(0, Math.min(255, newRgb[channel] + diff));
+            
+            return {
+                color: `rgb(${newRgb[0]}, ${newRgb[1]}, ${newRgb[2]})`,
+                channel,
+                diff
+            };
+        }
+
+        // 生成色块网格
+        function generateColorGrid() {
+            colorGrid.innerHTML = '';
+            
+            // 生成随机颜色
+            gameState.originalColor = generateRandomColor();
+            
+            // 生成略有不同的颜色
+            const differentColorData = generateDifferentColor(gameState.originalColor, gameState.difficulty);
+            gameState.differentColor = differentColorData.color;
+            
+            // 随机选择一个位置放置不同的色块
+            gameState.correctPosition = Math.floor(Math.random() * (gameState.gridSize * gameState.gridSize));
+            
+            // 更新色彩差异说明
+            updateDifferenceExplanation(gameState.originalColor, gameState.differentColor, differentColorData.channel, differentColorData.diff);
+            
+            // 创建色块
+            for (let i = 0; i < gameState.gridSize * gameState.gridSize; i++) {
+                const tile = document.createElement('div');
+                const color = i === gameState.correctPosition ? gameState.differentColor : gameState.originalColor;
+                
+                tile.className = 'aspect-square rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105';
+                tile.style.backgroundColor = color;
+                tile.dataset.index = i;
+                
+                // 添加点击事件
+                tile.addEventListener('click', () => handleTileClick(i));
+                
+                colorGrid.appendChild(tile);
+            }
+        }
+
+        // 更新色彩差异说明
+        function updateDifferenceExplanation(originalColor, differentColor, channel, diff) {
+            originalColorDisplay.style.backgroundColor = originalColor;
+            differentColorDisplay.style.backgroundColor = differentColor;
+            
+            // 重置所有差异显示
+            redDiffDisplay.textContent = '+0';
+            greenDiffDisplay.textContent = '+0';
+            blueDiffDisplay.textContent = '+0';
+            
+            // 更新实际差异
+            const channels = ['red-diff', 'green-diff', 'blue-diff'];
+            const display = document.getElementById(channels[channel]);
+            display.textContent = diff > 0 ? `+${diff}` : `${diff}`;
+            
+            // 为差异添加颜色
+            if (diff > 0) {
+                display.classList.add('text-green-600');
+                display.classList.remove('text-red-600');
+            } else if (diff < 0) {
+                display.classList.add('text-red-600');
+                display.classList.remove('text-green-600');
+            } else {
+                display.classList.remove('text-green-600', 'text-red-600');
+            }
+        }
+
+        // 处理色块点击
+        function handleTileClick(index) {
+            if (!gameState.gameActive) return;
+            
+            gameState.totalAttempts++;
+            
+            if (index === gameState.correctPosition) {
+                // 正确选择
+                gameState.correctAttempts++;
+                gameState.score += Math.floor(100 / gameState.difficulty) + 10;
+                gameState.difficulty++;
+                
+                showToast(successToast);
+                
+                // 显示差异说明
+                differenceExplanation.classList.remove('hidden');
+                
+                // 更新显示
+                updateDisplay();
+                
+                // 延迟后生成新的网格
+                setTimeout(() => {
+                    generateColorGrid();
+                }, 1000);
+            } else {
+                // 错误选择
+                showToast(errorToast);
+                
+                // 显示正确位置
+                const correctTile = colorGrid.children[gameState.correctPosition];
+                correctTile.classList.add('ring-4', 'ring-green-500');
+                
+                // 显示差异说明
+                differenceExplanation.classList.remove('hidden');
+                
+                // 延迟后继续当前难度
+                setTimeout(() => {
+                    correctTile.classList.remove('ring-4', 'ring-green-500');
+                }, 1500);
+            }
+        }
+
+        // 显示提示弹窗
+        function showToast(toast) {
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 1500);
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            scoreDisplay.textContent = gameState.score;
+            difficultyDisplay.textContent = gameState.difficulty;
+            hintsLeftDisplay.textContent = gameState.hints;
+        }
+
+        // 更新计时器
+        function updateTimer() {
+            gameState.time++;
+            timerDisplay.textContent = formatTime(gameState.time);
+            
+            // 如果时间超过3分钟，游戏结束
+            if (gameState.time >= 180) {
+                endGame();
+            }
+        }
+
+        // 格式化时间
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

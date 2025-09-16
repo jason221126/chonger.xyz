@@ -164,7 +164,121 @@
       });
     });
     
+    // 评价轮播
+const slider = document.querySelector('.testimonial-slider');
 
+if (slider) {
+    const track = slider.querySelector('.testimonial-track');
+    const originalSlides = Array.from(track.querySelectorAll('.testimonial-slide'));
+    const prevButton = slider.querySelector('.testimonial-prev');
+    const nextButton = slider.querySelector('.testimonial-next');
+    const indicatorsContainer = slider.querySelector('.testimonial-indicators');
+
+    let currentPage = 0;
+    let pageCount = 0;
+    let slidesPerView = 3;
+
+    function debounce(func, wait = 250) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    function setupCarousel() {
+        slidesPerView = window.innerWidth < 768 ? 1 : (window.innerWidth < 1280 ? 2 : 3);
+        pageCount = Math.ceil(originalSlides.length / slidesPerView);
+        
+        // On resize, make sure currentPage is not out of bounds
+        if (currentPage >= pageCount) {
+            currentPage = pageCount - 1;
+        }
+
+        track.innerHTML = ''; // Clear the track to rebuild pages
+
+        for (let i = 0; i < pageCount; i++) {
+            const page = document.createElement('div');
+            page.classList.add('testimonial-page', 'flex', 'min-w-full', 'flex-shrink-0');
+            
+            const pageSlides = originalSlides.slice(i * slidesPerView, (i + 1) * slidesPerView);
+            
+            pageSlides.forEach(slide => {
+                slide.style.width = `${100 / slidesPerView}%`;
+                page.appendChild(slide.cloneNode(true)); // Use cloneNode to avoid issues
+            });
+            track.appendChild(page);
+        }
+
+        // Create indicators
+        if (indicatorsContainer) {
+            indicatorsContainer.innerHTML = '';
+            for (let i = 0; i < pageCount; i++) {
+                const button = document.createElement('button');
+                button.setAttribute('aria-label', `Go to page ${i + 1}`);
+                button.classList.add('w-2', 'h-2', 'rounded-full', 'transition-all', 'duration-300', 'bg-light/20');
+                button.addEventListener('click', () => {
+                    currentPage = i;
+                    updateCarouselUI();
+                });
+                indicatorsContainer.appendChild(button);
+            }
+        }
+        
+        updateCarouselUI();
+    }
+
+    function updateCarouselUI() {
+        if (currentPage < 0) currentPage = 0;
+        if (currentPage >= pageCount) currentPage = pageCount - 1;
+
+        track.style.transform = `translateX(-${currentPage * 100}%)`;
+
+        if (indicatorsContainer) {
+            Array.from(indicatorsContainer.children).forEach((indicator, index) => {
+                indicator.classList.toggle('bg-primary', index === currentPage);
+                indicator.classList.toggle('w-4', index === currentPage);
+                indicator.classList.toggle('bg-light/20', index !== currentPage);
+                indicator.classList.toggle('w-2', index !== currentPage);
+            });
+        }
+
+        if (prevButton) {
+            prevButton.disabled = currentPage === 0;
+            prevButton.classList.toggle('opacity-50', currentPage === 0);
+            prevButton.classList.toggle('cursor-not-allowed', currentPage === 0);
+        }
+        if (nextButton) {
+            nextButton.disabled = currentPage >= pageCount - 1;
+            nextButton.classList.toggle('opacity-50', currentPage >= pageCount - 1);
+            nextButton.classList.toggle('cursor-not-allowed', currentPage >= pageCount - 1);
+        }
+    }
+
+    function handleNext() {
+        if (currentPage < pageCount - 1) {
+            currentPage++;
+            updateCarouselUI();
+        }
+    }
+
+    function handlePrev() {
+        if (currentPage > 0) {
+            currentPage--;
+            updateCarouselUI();
+        }
+    }
+
+    if (track && originalSlides.length > 0) {
+        // Initial setup
+        setupCarousel();
+
+        // Add event listeners
+        if (nextButton) nextButton.addEventListener('click', handleNext);
+        if (prevButton) prevButton.addEventListener('click', handlePrev);
+        window.addEventListener('resize', debounce(setupCarousel));
+    }
+}
 
     // 图表
     document.addEventListener('DOMContentLoaded', function() {

@@ -72,4 +72,9 @@
         background-color: rgba(22, 93, 255, 0.2);
         color: #fff;
       }
+      #mobile-menu {
+        background-color: rgba(10, 15, 28, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
     }
