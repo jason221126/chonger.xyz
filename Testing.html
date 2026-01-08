@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站浏览量统计</title>
+    <style>
+        .counter-box {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            width: 300px;
+        }
+        .counter-item {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #333;
+        }
+        .counter-num {
+            color: #0078d7;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="counter-box">
+        <div class="counter-item">今日浏览量：<span id="daily-count" class="counter-num">0</span></div>
+        <div class="counter-item">总浏览量：<span id="total-count" class="counter-num">0</span></div>
+    </div>
+
+    <!-- 引入LeanCloud SDK（补全HTTPS协议） -->
+    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4/dist/av-min.js"></script>
+    <script>
+        // 1. 替换成你自己的LeanCloud AppID和AppKey
+        const APP_ID = "PhugBPgZIvRS0j9P4Pt9kKdj-MdYXbMMI";
+        const APP_KEY = "VkfOc6PNz8ggyeFXxPUanpxA";
+        
+        // 初始化LeanCloud（添加国内节点配置）
+        AV.init({
+            appId: APP_ID,
+            appKey: APP_KEY,
+            region: "cn" // 国内应用必须加这行
+        });
+
+        // 2. 获取当前日期（格式：YYYY-MM-DD，修正所有拼写错误）
+        function getCurrentDate() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0'); // 修正getDete为getDate
+            return `${year}-${month}-${day}`;
+        }
+
+        // 3. 更新并渲染浏览量
+        async function updateCounter() {
+            const Counter = AV.Object.extend('Counter');
+            const query = new AV.Query(Counter);
+
+            try {
+                // 获取Counter表中的第一条数据
+                let counter = await query.first();
+
+                // 若无初始数据，自动创建
+                if (!counter) {
+                    counter = new Counter();
+                    counter.set('date', getCurrentDate()); // 修正函数调用名
+                    counter.set('daily', 0);
+                    counter.set('total', 0);
+                }
+
+                const today = getCurrentDate(); // 修正函数调用名
+                // 判断是否跨天并更新数据
+                if (counter.get('date') !== today) {
+                    counter.set('date', today);
+                    counter.set('daily', 1);
+                    counter.increment('total', 1);
+                } else {
+                    counter.increment('daily', 1);
+                    counter.increment('total', 1);
+                }
+
+                // 保存数据到LeanCloud
+                await counter.save();
+
+                // 渲染数据到页面
+                document.getElementById('daily-count').innerText = counter.get('daily');
+                document.getElementById('total-count').innerText = counter.get('total');
+
+            } catch (error) {
+                console.error('浏览量统计失败：', error);
+                alert('统计加载失败，请检查控制台错误信息');
+            }
+        }
+
+        // 页面加载时执行统计逻辑
+        window.onload = updateCounter;
+    </script>
+</body>
+</html>
