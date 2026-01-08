@@ -38,8 +38,8 @@
               产品 <i class="fa fa-angle-down text-xs"></i>
             </a>
             <div class="dropdown-menu">
-              <a href="html\分类.html" class="dropdown-item">科技分类</a>
-              <a href="#" class="dropdown-item">-</a>
+              <a href="科技分类\分类.html" class="dropdown-item">科技分类</a>
+              <a href="打印服务\打印.html" class="dropdown-item">打印服务</a>
               <a href="#" class="dropdown-item">-</a>
               <a href="#" class="dropdown-item">-</a>
               <a href="#" class="dropdown-item">-</a>
@@ -97,7 +97,7 @@
             </a>
             <div class="mobile-dropdown-menu mt-3 pl-4 hidden">
               <a href="html\分类.html" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">科技分类</a>
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
+              <a href="打印服务\打印.html" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">打印服务</a>
               <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
               <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
               <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
@@ -143,8 +143,8 @@
           </div>
           
           <h1 class="text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-tight animate-on-scroll" style="animation-delay: 0.1s">
-            未来科技，<br>
-            <span class="bg-gradient-to-r from-primary to-secondary text-gradient">现在触手可及</span>
+            慢下脚步<br>
+            <span class="bg-gradient-to-r from-primary to-secondary text-gradient">让心灵照亮前行的路</span>
           </h1>
           
           <p class="text-light/70 text-lg md:text-xl animate-on-scroll" style="animation-delay: 0.2s">
@@ -217,31 +217,17 @@
         </div>
       </div>
       
-      <!-- 品牌标志 -->
-      <div class="mt-32 animate-on-scroll">
-        <p class="text-center text-light/50 text-sm mb-8">全球超过0家企业正在使用我们的解决方案</p>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center justify-items-center opacity-60">
-          <div class="grayscale hover:grayscale-0 transition-all">
-            <i class="fa fa-apple text-4xl"></i>
-          </div>
-          <div class="grayscale hover:grayscale-0 transition-all">
-            <i class="fa fa-google text-4xl"></i>
-          </div>
-          <div class="grayscale hover:grayscale-0 transition-all">
-            <i class="fa fa-microsoft text-4xl"></i>
-          </div>
-          <div class="grayscale hover:grayscale-0 transition-all">
-            <i class="fa fa-amazon text-4xl"></i>
-          </div>
-          <div class="grayscale hover:grayscale-0 transition-all">
-            <i class="fa fa-spotify text-4xl"></i>
-          </div>
-          <div class="grayscale hover:grayscale-0 transition-all">
-            <i class="fa fa-slack text-4xl"></i>
-          </div>
-        </div>
-      </div>
-    </div>
+<!-- 横向并列的统计卡片容器 -->
+<div class="count-wrapper">
+  <div class="count-card">
+    <div class="count-title">总浏览量</div>
+    <div class="count-num" id="total-count">0</div>
+  </div>
+  <div class="count-card">
+    <div class="count-title">今日浏览量</div>
+    <div class="count-num" id="daily-count">0</div>
+  </div>
+</div>
     
     <!-- 向下滚动指示 -->
     <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
@@ -256,13 +242,13 @@
     <div class="container mx-auto px-4 md:px-8">
       <div class="text-center max-w-3xl mx-auto mb-16 animate-on-scroll">
         <span class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium mb-4">
-          创新产品系列
+          项目系列
         </span>
         <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-4">
-          为未来打造的科技产品
+          项目产品
         </h2>
         <p class="text-light/70 text-lg">
-          我们的产品组合融合了前沿技术与实用功能，为您的生活和工作带来革命性的改变。
+          设计及开发项目总结，不限于开发完成的项目，包括一些产品概念...
         </p>
       </div>
       
@@ -1338,5 +1324,78 @@
     <i class="fa fa-angle-up text-xl"></i>
   </button>
   <script src="script.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4/dist/av-min.js"></script>
+       <script>
+// 替换为你的LeanCloud AppID和AppKey
+const APP_ID = "PhugBPgZIvRS0j9P4Pt9kKdj-MdYXbMMI";
+const APP_KEY = "VkfOc6PNz8ggyeFXxPUanpxA";
+
+// 初始化LeanCloud
+AV.init({
+  appId: APP_ID,
+  appKey: APP_KEY,
+  region: "cn"
+});
+
+// 数字滚动动画函数
+function countUp(targetEl, targetNum, delay = 0) {
+  let currentNum = 0;
+  const step = Math.ceil(targetNum / 50); // 分50步滚动，可调整速度
+  const timer = setInterval(() => {
+    currentNum += step;
+    if (currentNum >= targetNum) {
+      currentNum = targetNum;
+      clearInterval(timer);
+    }
+    targetEl.innerText = currentNum;
+  }, 30); // 每30ms走一步，可调整帧率
+}
+
+// 获取并更新统计数据
+async function updateCounter() {
+  const Counter = AV.Object.extend('Counter');
+  const query = new AV.Query(Counter);
+
+  try {
+    let counter = await query.first();
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!counter) {
+      counter = new Counter();
+      counter.set('date', today);
+      counter.set('daily', 0);
+      counter.set('total', 0);
+      await counter.save();
+    }
+
+    // 跨天判断与数据更新
+    if (counter.get('date') !== today) {
+      counter.set('date', today);
+      counter.set('daily', 1);
+      counter.increment('total', 1);
+    } else {
+      counter.increment('daily', 1);
+      counter.increment('total', 1);
+    }
+    await counter.save();
+
+    // 获取目标数值
+    const totalNum = counter.get('total');
+    const dailyNum = counter.get('daily');
+
+    // 执行滚动动画（匹配卡片出场延迟）
+    const totalEl = document.getElementById('total-count');
+    const dailyEl = document.getElementById('daily-count');
+    setTimeout(() => countUp(totalEl, totalNum), 300); // 总浏览延迟0.5s
+    setTimeout(() => countUp(dailyEl, dailyNum), 600); // 今日浏览延迟0.9s
+
+  } catch (error) {
+    console.error('统计更新失败：', error);
+  }
+}
+
+// 页面加载执行
+window.onload = updateCounter;
+    </script>
 </body>
 </html>
