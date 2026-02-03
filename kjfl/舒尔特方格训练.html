@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>舒尔特方格训练 - 提升注意力与视觉搜索能力</title>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <!-- 统一的 Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            secondary: '#60a5fa',
+            accent: '#2563eb',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+            light: '#f3f4f6',
+            dark: '#1f2937'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+          },
+          keyframes: {
+            shake: {
+              '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+              '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+              '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+              '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .cell-active {
+        @apply bg-primary text-white scale-105;
+      }
+      .btn-primary {
+        @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:outline-none;
+      }
+      .btn-secondary {
+        @apply bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-secondary/50 focus:outline-none;
+      }
+      .btn-outline {
+        @apply border border-primary text-primary hover:bg-primary hover:text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:outline-none;
+      }
+      .card {
+        @apply bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+      }
+      .badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+      }
+      .badge-success {
+        @apply bg-success/20 text-success;
+      }
+      .badge-warning {
+        @apply bg-warning/20 text-warning;
+      }
+      .badge-danger {
+        @apply bg-danger/20 text-danger;
+      }
+      .input-control {
+        @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary;
+      }
+      .label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-th text-primary text-2xl"></i>
+        <h1 class="text-xl font-bold text-gray-800">舒尔特方格训练</h1>
+      </div>
+      <nav class="hidden md:flex space-x-6">
+        <a href="#home" class="text-gray-600 hover:text-primary transition-colors">首页</a>
+        <a href="#training" class="text-gray-600 hover:text-primary transition-colors">训练</a>
+        <a href="#results" class="text-gray-600 hover:text-primary transition-colors">成绩</a>
+        <a href="#guide" class="text-gray-600 hover:text-primary transition-colors">指南</a>
+      </nav>
+      <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-primary">
+        <i class="fa fa-bars text-xl"></i>
+      </button>
+    </div>
+    <!-- 移动端菜单 -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
+      <div class="container mx-auto px-4 py-2 flex flex-col space-y-2">
+        <a href="#home" class="text-gray-600 hover:text-primary py-2 transition-colors">首页</a>
+        <a href="#training" class="text-gray-600 hover:text-primary py-2 transition-colors">训练</a>
+        <a href="#results" class="text-gray-600 hover:text-primary py-2 transition-colors">成绩</a>
+        <a href="#guide" class="text-gray-600 hover:text-primary py-2 transition-colors">指南</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- 欢迎区域 -->
+    <section id="home" class="mb-12">
+      <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-lg overflow-hidden">
+        <div class="md:flex">
+          <div class="md:w-1/2 p-8 md:p-12 text-white">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">提升你的注意力与视觉搜索能力</h2>
+            <p class="text-lg mb-6 opacity-90">舒尔特方格是一种简单而有效的注意力训练方法，通过动态练习锻炼视神经末梢，提高视觉搜索速度和注意力集中能力。</p>
+            <div class="flex flex-wrap gap-4">
+              <a href="#training" class="bg-white text-primary hover:bg-opacity-90 font-medium py-2 px-6 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-white/50 focus:outline-none">
+                开始训练
+              </a>
+              <a href="#guide" class="bg-white/20 text-white hover:bg-white/30 font-medium py-2 px-6 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-white/50 focus:outline-none">
+                了解更多
+              </a>
+            </div>
+          </div>
+          <div class="md:w-1/2 bg-white p-8 flex items-center justify-center">
+            <div class="grid grid-cols-5 gap-2 w-full max-w-md">
+              <!-- 示例舒尔特方格 -->
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">1</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">12</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">23</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">14</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">5</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">6</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">17</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">8</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">19</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">10</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">11</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">2</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">22</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">13</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">24</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">25</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">16</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">7</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">18</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">4</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">9</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">20</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">3</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">21</div>
+              <div class="aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold">15</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 训练区域 -->
+    <section id="training" class="mb-12">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">开始你的训练</h2>
+        <p class="text-gray-600">选择难度级别，然后按照顺序点击数字，挑战你的注意力和反应速度</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- 设置面板 -->
+        <div class="card p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">训练设置</h3>
+          
+          <div class="mb-4">
+            <label class="label" for="difficulty">难度级别</label>
+            <select id="difficulty" class="input-control">
+              <option value="3">3×3 (初学者)</option>
+              <option value="4" selected>4×4 (儿童版)</option>
+              <option value="5">5×5 (标准版)</option>
+              <option value="6">6×6 (进阶版)</option>
+              <option value="7">7×7 (挑战版)</option>
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label class="label" for="age-group">年龄组别</label>
+            <select id="age-group" class="input-control">
+              <option value="child">儿童 (7-12岁)</option>
+              <option value="teen">青少年 (13-17岁)</option>
+              <option value="adult" selected>成人 (18岁以上)</option>
+            </select>
+          </div>
+          
+          <div class="mb-6">
+            <label class="label" for="grid-type">方格类型</label>
+            <select id="grid-type" class="input-control">
+              <option value="numbers" selected>数字</option>
+              <option value="letters">字母</option>
+              <option value="mixed">混合 (数字+字母)</option>
+            </select>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="text-sm text-gray-500">最佳成绩:</span>
+              <span id="best-time" class="ml-2 font-semibold text-primary">--:--.---</span>
+            </div>
+            <button id="start-training" class="btn-primary">
+              <i class="fa fa-play mr-2"></i>开始
+            </button>
+          </div>
+        </div>
+        
+        <!-- 训练面板 -->
+        <div class="md:col-span-2">
+          <div class="card p-6 h-full flex flex-col">
+            <!-- 计时器 -->
+            <div class="text-center mb-6">
+              <div id="timer" class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">00:00.000</div>
+              <div class="flex justify-center justify-center items-center space-x-4">
+                <div id="status" class="badge badge-warning">准备就绪</div>
+                <div id="current-target-container" class="hidden">
+                  <span class="text-sm text-gray-500">当前需要点击:</span>
+                  <span id="current-target" class="ml-2 font-semibold text-primary text-lg">1</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 方格区域 -->
+            <div class="flex-grow flex items-center justify-center">
+              <div id="grid-container" class="grid gap-2 w-full max-w-lg mx-auto">
+                <!-- 方格将通过JavaScript动态生成 -->
+                <div class="text-center text-gray-500 py-12 col-span-full">
+                  <i class="fa fa-th text-4xl mb-4 opacity-30"></i>
+                  <p>点击"开始"按钮生成舒尔特方格</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div class="flex justify-center mt-6 space-x-4">
+              <button id="reset-training" class="btn-outline" disabled>
+                <i class="fa fa-refresh mr-2"></i>重置
+              </button>
+              <button id="pause-training" class="btn-secondary" disabled>
+                <i class="fa fa-pause mr-2"></i>暂停
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 成绩区域 -->
+    <section id="results" class="mb-12">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">训练成绩</h2>
+        <p class="text-gray-600">查看你的训练历史和进步情况</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- 成绩图表 -->
+        <div class="card p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">成绩趋势</h3>
+          <div class="h-64">
+            <canvas id="results-chart"></canvas>
+          </div>
+        </div>
+        
+        <!-- 成绩列表 -->
+        <div class="card p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">最近成绩</h3>
+            <button id="clear-results" class="text-sm text-gray-500 hover:text-danger transition-colors">
+              <i class="fa fa-trash mr-1"></i>清除记录
+            </button>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">难度</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">评级</th>
+                </tr>
+              </thead>
+              <tbody id="results-table" class="bg-white divide-y divide-gray-200">
+                <!-- 成绩记录将通过JavaScript动态生成 -->
+                <tr>
+                  <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                    暂无训练记录
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 指南区域 -->
+    <section id="guide" class="mb-12">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">训练指南</h2>
+        <p class="text-gray-600">了解舒尔特方格训练的原理和方法</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- 训练方法 -->
+        <div class="card p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">训练方法</h3>
+          <ul class="space-y-3 text-gray-700">
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>选择适合你的难度级别，从低难度开始练习</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>点击"开始"按钮后，按照顺序点击数字或字母</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>训练时保持专注，尽量减少眼球移动</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>每天练习5-10分钟，坚持一段时间后你会看到进步</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>当你能轻松完成当前难度时，尝试提高难度级别</span>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- 评分标准 -->
+        <div class="card p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">评分标准</h3>
+          
+          <div class="mb-4">
+            <h4 class="font-medium text-gray-700 mb-2">4×4格舒尔特方格（儿童版）</h4>
+            <ul class="space-y-1 text-sm text-gray-600">
+              <li class="flex justify-between">
+                <span>优秀</span>
+                <span class="badge badge-success">16秒以内</span>
+              </li>
+              <li class="flex justify-between">
+                <span>中等</span>
+                <span class="badge badge-warning">26秒以内</span>
+              </li>
+              <li class="flex justify-between">
+                <span>问题较大</span>
+                <span class="badge badge-danger">50秒以上</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="mb-4">
+            <h4 class="font-medium text-gray-700 mb-2">5×5格舒尔特方格</h4>
+            <div class="mb-2">
+              <p class="text-xs text-gray-500 mb-1">7-12岁</p>
+              <ul class="space-y-1 text-sm text-gray-600">
+                <li class="flex justify-between">
+                  <span>优秀</span>
+                  <span class="badge badge-success">26秒以内</span>
+                </li>
+                <li class="flex justify-between">
+                  <span>中等</span>
+                  <span class="badge badge-warning">42秒以内</span>
+                </li>
+                <li class="flex justify-between">
+                  <span>问题较大</span>
+                  <span class="badge badge-danger">50秒以上</span>
+                </li>
+              </ul>
+            </div>
+            <div class="mb-2">
+              <p class="text-xs text-gray-500 mb-1">13-17岁</p>
+              <ul class="space-y-1 text-sm text-gray-600">
+                <li class="flex justify-between">
+                  <span>优秀</span>
+                  <span class="badge badge-success">16秒以内</span>
+                </li>
+                <li class="flex justify-between">
+                  <span>中等</span>
+                  <span class="badge badge-warning">26秒以内</span>
+                </li>
+                <li class="flex justify-between">
+                  <span>问题较大</span>
+                  <span class="badge badge-danger">36秒以上</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-1">18岁及以上</p>
+              <ul class="space-y-1 text-sm text-gray-600">
+                <li class="flex justify-between">
+                  <span>优秀</span>
+                  <span class="badge badge-success">8秒以内</span>
+                </li>
+                <li class="flex justify-between">
+                  <span>中等</span>
+                  <span class="badge badge-warning">20秒以内</span>
+                </li>
+                <li class="flex justify-between">
+                  <span>需提高</span>
+                  <span class="badge badge-danger">30秒以上</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 训练益处 -->
+      <div class="card p-6 mt-8">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">训练益处</h3>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-3">
+                <i class="fa fa-eye"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">提升视觉能力</h4>
+            </div>
+            <p class="text-sm text-gray-600">锻炼视神经末梢，提高视觉搜索速度和视觉稳定性、辨别力、定向搜索能力。</p>
+          </div>
+          
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-3">
+                <i class="fa fa-brain"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">增强注意力</h4>
+            </div>
+            <p class="text-sm text-gray-600">培养注意力集中、分配、控制能力，提高学习和工作效率。</p>
+          </div>
+          
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-3">
+                <i class="fa fa-book"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">提高阅读能力</h4>
+            </div>
+            <p class="text-sm text-gray-600">拓展视幅，加快视频，提高阅读速度，达到一目十行、一目一页的效果。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="container mx-auto px-4">
+      <div class="md:flex md:justify-between">
+        <div class="mb-6 md:mb-0">
+          <div class="flex items-center space-x-2">
+            <i class="fa fa-th text-primary text-2xl"></i>
+            <h2 class="text-xl font-bold">舒尔特方格训练</h2>
+          </div>
+          <p class="mt-2 text-gray-400">提升注意力与视觉搜索能力的专业训练工具</p>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-8 sm:grid-cols-3">
+          <div>
+            <h3 class="text-lg font-semibold mb-4">快速链接</h3>
+            <ul class="space-y-2">
+              <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">首页</a></li>
+              <li><a href="#training" class="text-gray-400 hover:text-white transition-colors">训练</a></li>
+              <li><a href="#results" class="text-gray-400 hover:text-white transition-colors">成绩</a></li>
+              <li><a href="#guide" class="text-gray-400 hover:text-white transition-colors">指南</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-semibold mb-4">训练资源</h3>
+            <ul class="space-y-2">
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">注意力训练方法</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">视觉搜索技巧</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">阅读速度提升</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">大脑训练科学</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-semibold mb-4">联系我们</h3>
+            <ul class="space-y-2">
+              <li class="flex items-center">
+                <i class="fa fa-envelope text-primary mr-2"></i>
+                <a href="mailto:contact@schultegrid.com" class="text-gray-400 hover:text-white transition-colors">contact@schultegrid.com</a>
+              </li>
+              <li class="flex items-center">
+                <i class="fa fa-github text-primary mr-2"></i>
+                <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">github.com/schultegrid</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <hr class="my-6 border-gray-700 sm:mx-auto lg:my-8">
+      
+      <div class="sm:flex sm:items-center sm:justify-between">
+        <span class="text-sm text-gray-400">© 2025 舒尔特方格训练. 保留所有权利.</span>
+        <div class="flex mt-4 space-x-6 sm:justify-center sm:mt-0">
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <i class="fa fa-facebook"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <i class="fa fa-twitter"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <i class="fa fa-instagram"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <i class="fa fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 完成训练模态框 -->
+  <div id="complete-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center text-success mx-auto mb-4">
+          <i class="fa fa-check text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">训练完成！</h3>
+        <p class="text-gray-600 mb-4">恭喜你完成了舒尔特方格训练</p>
+        
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-600">难度级别:</span>
+            <span id="result-difficulty" class="font-semibold text-gray-800">5×5</span>
+          </div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-600">完成时间:</span>
+            <span id="result-time" class="font-semibold text-primary">00:15.234</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">评级:</span>
+            <span id="result-rating" class="badge badge-success">优秀</span>
+          </div>
+        </div>
+        
+        <div class="flex space-x-4">
+          <button id="new-training" class="btn-primary flex-1">
+            <i class="fa fa-play mr-2"></i>新训练
+          </button>
+          <button id="view-results" class="btn-outline flex-1">
+            <i class="fa fa-bar-chart mr-2"></i>查看成绩
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // 全局变量
+    let grid = [];
+    let currentNumber = 1;
+    let startTime = 0;
+    let endTime = 0;
+    let timerInterval = null;
+    let isPaused = false;
+    let isTraining = false;
+    let results = [];
+    let resultsChart = null;
+
+    // DOM 元素
+    const gridContainer = document.getElementById('grid-container');
+    const timerElement = document.getElementById('timer');
+    const statusElement = document.getElementById('status');
+    const currentTargetContainer = document.getElementById('current-target-container');
+    const currentTargetElement = document.getElementById('current-target');
+    const startButton = document.getElementById('start-training');
+    const resetButton = document.getElementById('reset-training');
+    const pauseButton = document.getElementById('pause-training');
+    const difficultySelect = document.getElementById('difficulty');
+    const ageGroupSelect = document.getElementById('age-group');
+    const gridTypeSelect = document.getElementById('grid-type');
+    const bestTimeElement = document.getElementById('best-time');
+    const resultsTable = document.getElementById('results-table');
+    const clearResultsButton = document.getElementById('clear-results');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const completeModal = document.getElementById('complete-modal');
+    const resultDifficultyElement = document.getElementById('result-difficulty');
+    const resultTimeElement = document.getElementById('result-time');
+    const resultRatingElement = document.getElementById('result-rating');
+    const newTrainingButton = document.getElementById('new-training');
+    const viewResultsButton = document.getElementById('view-results');
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 加载保存的成绩
+      loadResults();
+      
+      // 初始化图表
+      initChart();
+      
+      // 更新成绩表格
+      updateResultsTable();
+      
+      // 更新最佳成绩
+      updateBestTime();
+      
+      // 事件监听
+      startButton.addEventListener('click', startTraining);
+      resetButton.addEventListener('click', resetTraining);
+      pauseButton.addEventListener('click', togglePause);
+      difficultySelect.addEventListener('change', updateBestTime);
+      ageGroupSelect.addEventListener('change', updateBestTime);
+      gridTypeSelect.addEventListener('change', updateBestTime);
+      clearResultsButton.addEventListener('click', clearResults);
+      mobileMenuButton.addEventListener('click', toggleMobileMenu);
+      newTrainingButton.addEventListener('click', () => {
+        completeModal.classList.add('hidden');
+        resetTraining();
+        startTraining();
+      });
+      viewResultsButton.addEventListener('click', () => {
+        completeModal.classList.add('hidden');
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // 生成舒尔特方格
+    function generateGrid() {
+      const size = parseInt(difficultySelect.value);
+      const type = gridTypeSelect.value;
+      grid = [];
+      
+      // 根据类型生成不同的内容
+      let content = [];
+      if (type === 'numbers') {
+        content = Array.from({ length: size * size }, (_, i) => i + 1);
+      } else if (type === 'letters') {
+        content = Array.from({ length: size * size }, (_, i) => String.fromCharCode(65 + i));
+      } else if (type === 'mixed') {
+        // 混合模式：数字和字母
+        const numbers = Array.from({ length: Math.ceil(size * size / 2) }, (_, i) => i + 1);
+        const letters = Array.from({ length: Math.floor(size * size / 2) }, (_, i) => String.fromCharCode(65 + i));
+        content = [...numbers, ...letters];
+      }
+      
+      // 打乱顺序
+      shuffleArray(content);
+      
+      // 创建方格
+      gridContainer.innerHTML = '';
+      gridContainer.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+      
+      content.forEach((item, index) => {
+        const cell = document.createElement('div');
+        cell.className = 'aspect-square bg-white border border-gray-200 rounded-lg flex items-center justify-center text-lg font-bold text-gray-800 cursor-pointer';
+        cell.textContent = item;
+        cell.dataset.value = item;
+        
+        cell.addEventListener('click', () => handleCellClick(item, cell));
+        
+        gridContainer.appendChild(cell);
+        grid.push({
+          value: item,
+          element: cell,
+          index: index
+        });
+      });
+    }
+
+    // 处理方格点击
+    function handleCellClick(value, cell) {
+      if (!isTraining || isPaused) return;
+      
+      // 检查是否是当前需要点击的数字/字母
+      if (String(value) === String(getCurrentTarget())) {
+        // 如果是最后一个
+        if (currentNumber === grid.length) {
+          endTraining();
+          return;
+        }
+        
+        // 准备下一个
+        currentNumber++;
+        
+        // 更新当前目标显示
+        updateCurrentTargetDisplay();
+      } else {
+        // 点击错误，添加抖动效果和红色边框
+        cell.classList.add('shake', 'border-danger');
+        setTimeout(() => {
+          cell.classList.remove('shake', 'border-danger');
+        }, 500);
+      }
+    }
+    
+    // 更新当前目标显示
+    function updateCurrentTargetDisplay() {
+      currentTargetElement.textContent = getCurrentTarget();
+    }
+
+    // 获取当前目标
+    function getCurrentTarget() {
+      const type = gridTypeSelect.value;
+      if (type === 'numbers') {
+        return currentNumber;
+      } else if (type === 'letters') {
+        return String.fromCharCode(64 + currentNumber);
+      } else if (type === 'mixed') {
+        // 混合模式：先数字后字母
+        const numbersCount = Math.ceil(grid.length / 2);
+        if (currentNumber <= numbersCount) {
+          return currentNumber;
+        } else {
+          return String.fromCharCode(64 + (currentNumber - numbersCount));
+        }
+      }
+    }
+
+
+
+    // 开始训练
+    function startTraining() {
+      if (isTraining && !isPaused) return;
+      
+      if (!isTraining) {
+        // 首次开始训练
+        generateGrid();
+        currentNumber = 1;
+        startTime = performance.now();
+        isTraining = true;
+        isPaused = false;
+        
+        // 更新UI
+        startButton.disabled = true;
+        resetButton.disabled = false;
+        pauseButton.disabled = false;
+        statusElement.textContent = '训练中';
+        statusElement.className = 'badge badge-success';
+        
+        // 显示当前目标
+        currentTargetContainer.classList.remove('hidden');
+        updateCurrentTargetDisplay();
+      } else if (isPaused) {
+        // 继续暂停的训练
+        const pauseDuration = performance.now() - pauseTime;
+        startTime += pauseDuration;
+        isPaused = false;
+        
+        // 更新UI
+        pauseButton.innerHTML = '<i class="fa fa-pause mr-2"></i>暂停';
+        statusElement.textContent = '训练中';
+        statusElement.className = 'badge badge-success';
+        
+        // 更新当前目标显示
+        updateCurrentTargetDisplay();
+      }
+      
+      // 启动计时器
+      startTimer();
+    }
+
+    // 重置训练
+    function resetTraining() {
+      // 停止计时器
+      stopTimer();
+      
+      // 重置状态
+      isTraining = false;
+      isPaused = false;
+      currentNumber = 1;
+      
+      // 清空方格
+      gridContainer.innerHTML = `
+        <div class="text-center text-gray-500 py-12 col-span-full">
+          <i class="fa fa-th text-4xl mb-4 opacity-30"></i>
+          <p>点击"开始"按钮生成舒尔特方格</p>
+        </div>
+      `;
+      
+      // 更新UI
+      timerElement.textContent = '00:00.000';
+      statusElement.textContent = '准备就绪';
+      statusElement.className = 'badge badge-warning';
+      startButton.disabled = false;
+      resetButton.disabled = true;
+      pauseButton.disabled = true;
+      pauseButton.innerHTML = '<i class="fa fa-pause mr-2"></i>暂停';
+      
+      // 隐藏当前目标显示
+      currentTargetContainer.classList.add('hidden');
+    }
+
+    // 暂停/继续训练
+    function togglePause() {
+      if (!isTraining) return;
+      
+      if (!isPaused) {
+        // 暂停训练
+        stopTimer();
+        isPaused = true;
+        pauseTime = performance.now();
+        
+        // 更新UI
+        pauseButton.innerHTML = '<i class="fa fa-play mr-2"></i>继续';
+        statusElement.textContent = '已暂停';
+        statusElement.className = 'badge badge-warning';
+      } else {
+        // 继续训练
+        startTraining();
+      }
+    }
+
+    // 启动计时器
+    function startTimer() {
+      const startTimeCopy = startTime;
+      
+      timerInterval = setInterval(() => {
+        const currentTime = performance.now() - startTimeCopy;
+        timerElement.textContent = formatTime(currentTime);
+      }, 10);
+    }
+
+    // 停止计时器
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // 结束训练
+    function endTraining() {
+      // 停止计时器
+      stopTimer();
+      
+      // 记录结束时间
+      endTime = performance.now() - startTime;
+      
+      // 更新状态
+      isTraining = false;
+      
+      // 更新UI
+      statusElement.textContent = '训练完成';
+      statusElement.className = 'badge badge-success';
+      pauseButton.disabled = true;
+      
+      // 保存成绩
+      saveResult(endTime);
+      
+      // 显示完成模态框
+      showCompleteModal(endTime);
+    }
+
+    // 格式化时间
+    function formatTime(timeMs) {
+      const minutes = Math.floor(timeMs / 60000);
+      const seconds = Math.floor((timeMs % 60000) / 1000);
+      const milliseconds = Math.floor((timeMs % 1000));
+      
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    }
+
+    // 保存成绩
+    function saveResult(time) {
+      const size = parseInt(difficultySelect.value);
+      const ageGroup = ageGroupSelect.value;
+      const type = gridTypeSelect.value;
+      
+      const result = {
+        id: Date.now(),
+        date: new Date().toLocaleString(),
+        size: size,
+        ageGroup: ageGroup,
+        type: type,
+        time: time,
+        formattedTime: formatTime(time),
+        rating: getRating(size, ageGroup, time)
+      };
+      
+      // 添加到结果数组
+      results.unshift(result);
+      
+      // 保存到本地存储
+      localStorage.setItem('schulteResults', JSON.stringify(results));
+      
+      // 更新UI
+      updateResultsTable();
+      updateBestTime();
+      updateChart();
+    }
+
+    // 加载保存的成绩
+    function loadResults() {
+      const savedResults = localStorage.getItem('schulteResults');
+      if (savedResults) {
+        results = JSON.parse(savedResults);
+      }
+    }
+
+    // 清除所有成绩
+    function clearResults() {
+      if (confirm('确定要清除所有训练记录吗？')) {
+        results = [];
+        localStorage.removeItem('schulteResults');
+        updateResultsTable();
+        updateBestTime();
+        updateChart();
+      }
+    }
+
+    // 更新成绩表格
+    function updateResultsTable() {
+      if (results.length === 0) {
+        resultsTable.innerHTML = `
+          <tr>
+            <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+              暂无训练记录
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      resultsTable.innerHTML = '';
+      
+      // 只显示最近的10条记录
+      const recentResults = results.slice(0, 10);
+      
+      recentResults.forEach(result => {
+        const row = document.createElement('tr');
+        
+        // 日期
+        const dateCell = document.createElement('td');
+        dateCell.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-500';
+        dateCell.textContent = result.date;
+        row.appendChild(dateCell);
+        
+        // 难度
+        const difficultyCell = document.createElement('td');
+        difficultyCell.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-500';
+        difficultyCell.textContent = `${result.size}×${result.size} ${getTypeName(result.type)}`;
+        row.appendChild(difficultyCell);
+        
+        // 时间
+        const timeCell = document.createElement('td');
+        timeCell.className = 'px-4 py-3 whitespace-nowrap text-sm font-medium text-primary';
+        timeCell.textContent = result.formattedTime;
+        row.appendChild(timeCell);
+        
+        // 评级
+        const ratingCell = document.createElement('td');
+        ratingCell.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-500';
+        
+        const ratingBadge = document.createElement('span');
+        ratingBadge.className = getRatingBadgeClass(result.rating);
+        ratingBadge.textContent = result.rating;
+        
+        ratingCell.appendChild(ratingBadge);
+        row.appendChild(ratingCell);
+        
+        resultsTable.appendChild(row);
+      });
+    }
+
+    // 更新最佳成绩
+    function updateBestTime() {
+      const size = parseInt(difficultySelect.value);
+      const ageGroup = ageGroupSelect.value;
+      const type = gridTypeSelect.value;
+      
+      // 筛选相同条件的成绩
+      const filteredResults = results.filter(result => 
+        result.size === size && 
+        result.ageGroup === ageGroup && 
+        result.type === type
+      );
+      
+      if (filteredResults.length === 0) {
+        bestTimeElement.textContent = '--:--.---';
+        return;
+      }
+      
+      // 找出最快的成绩
+      const bestResult = filteredResults.reduce((min, result) => 
+        result.time < min.time ? result : min, filteredResults[0]
+      );
+      
+      bestTimeElement.textContent = bestResult.formattedTime;
+    }
+
+    // 获取评级
+    function getRating(size, ageGroup, time) {
+      const timeSeconds = time / 1000;
+      
+      // 5×5 标准评级
+      if (size === 5) {
+        if (ageGroup === 'child') { // 7-12岁
+          if (timeSeconds <= 26) return '优秀';
+          if (timeSeconds <= 42) return '中等';
+          return '问题较大';
+        } else if (ageGroup === 'teen') { // 13-17岁
+          if (timeSeconds <= 16) return '优秀';
+          if (timeSeconds <= 26) return '中等';
+          return '问题较大';
+        } else { // 成人
+          if (timeSeconds <= 8) return '优秀';
+          if (timeSeconds <= 20) return '中等';
+          return '需提高';
+        }
+      }
+      
+      // 4×4 儿童版评级
+      if (size === 4) {
+        if (timeSeconds <= 16) return '优秀';
+        if (timeSeconds <= 26) return '中等';
+        return '问题较大';
+      }
+      
+      // 其他尺寸的评级（基于平均每个字符1秒的标准）
+      const standardTime = size * size;
+      if (timeSeconds <= standardTime) return '优秀';
+      if (timeSeconds <= standardTime * 1.5) return '良好';
+      if (timeSeconds <= standardTime * 2) return '中等';
+      return '需提高';
+    }
+
+    // 获取评级对应的徽章类
+    function getRatingBadgeClass(rating) {
+      switch (rating) {
+        case '优秀':
+          return 'badge badge-success';
+        case '良好':
+          return 'badge bg-blue-100 text-blue-800';
+        case '中等':
+          return 'badge badge-warning';
+        case '问题较大':
+        case '需提高':
+          return 'badge badge-danger';
+        default:
+          return 'badge bg-gray-100 text-gray-800';
+      }
+    }
+
+    // 获取类型名称
+    function getTypeName(type) {
+      switch (type) {
+        case 'numbers':
+          return '数字';
+        case 'letters':
+          return '字母';
+        case 'mixed':
+          return '混合';
+        default:
+          return '';
+      }
+    }
+
+    // 显示完成模态框
+    function showCompleteModal(time) {
+      const size = parseInt(difficultySelect.value);
+      const ageGroup = ageGroupSelect.value;
+      
+      resultDifficultyElement.textContent = `${size}×${size} ${getTypeName(gridTypeSelect.value)}`;
+      resultTimeElement.textContent = formatTime(time);
+      
+      const rating = getRating(size, ageGroup, time);
+      resultRatingElement.textContent = rating;
+      resultRatingElement.className = getRatingBadgeClass(rating);
+      
+      completeModal.classList.remove('hidden');
+    }
+
+    // 初始化图表
+    function initChart() {
+      const ctx = document.getElementById('results-chart').getContext('2d');
+      
+      resultsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: '完成时间 (秒)',
+            data: [],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#3b82f6',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  return `时间: ${(context.parsed.y / 1000).toFixed(2)} 秒`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: '时间 (毫秒)'
+              },
+              ticks: {
+                callback: function(value) {
+                  return value / 1000;
+                }
+              }
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          },
+          animations: {
+            tension: {
+              duration: 1000,
+              easing: 'linear'
+            }
+          }
+        }
+      });
+      
+      // 更新图表数据
+      updateChart();
+    }
+
+    // 更新图表
+    function updateChart() {
+      if (!resultsChart) return;
+      
+      // 筛选当前设置的难度和类型的成绩
+      const size = parseInt(difficultySelect.value);
+      const type = gridTypeSelect.value;
+      
+      const filteredResults = results.filter(result => 
+        result.size === size && result.type === type
+      );
+      
+      // 只显示最近的10条记录
+      const recentResults = filteredResults.slice(0, 10).reverse();
+      
+      // 更新图表数据
+      resultsChart.data.labels = recentResults.map((_, index) => `#${recentResults.length - index}`);
+      resultsChart.data.datasets[0].data = recentResults.map(result => result.time);
+      
+      // 更新图表
+      resultsChart.update();
+    }
+
+    // 切换移动端菜单
+    function toggleMobileMenu() {
+      mobileMenu.classList.toggle('hidden');
+    }
+
+    // 辅助函数：打乱数组
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+  </script>
+</body>
+</html>

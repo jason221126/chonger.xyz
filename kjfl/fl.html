@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科技分类导航</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 配置Tailwind自定义主题 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        dark: '#1D2129',
+                        light: '#F2F3F5',
+                        'gray-medium': '#86909C'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+            }
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+            }
+            .nav-item {
+                @apply relative px-4 py-2 text-gray-medium hover:text-primary transition-colors duration-200;
+            }
+            .nav-item::after {
+                @apply absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 content-[''];
+            }
+            .nav-item:hover::after {
+                @apply w-full;
+            }
+            .category-card {
+                @apply transition-all duration-500 ease-in-out;
+            }
+            .search-results {
+                @apply absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl z-50 overflow-hidden max-h-96 overflow-y-auto;
+            }
+            .search-result-item {
+                @apply px-4 py-3 hover:bg-light transition-colors cursor-pointer;
+            }
+        }
+    </style>
+    <!-- 引入Google字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="font-inter bg-gray-50 text-dark">
+    <!-- 导航栏 -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-4 md:px-6">
+            <nav class="flex items-center justify-between h-16 md:h-20">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="#hero" class="flex items-center gap-2">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                            <i class="fa fa-cubes text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-dark">Chonger</span>
+                    </a>
+                </div>
+                
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="#hero" class="nav-item font-medium">首页</a>
+                    <a href="#categories" class="nav-item font-medium">分类</a>
+                    <a href="#popular" class="nav-item font-medium">热门</a>
+                    <a href="#latest" class="nav-item font-medium">最新</a>
+                    <a href="#about" class="nav-item font-medium">关于</a>
+                </div>
+                
+                <!-- 搜索和移动端菜单 -->
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center relative">
+                        <input type="text" id="desktopSearch" placeholder="搜索分类..." class="pl-10 pr-4 py-2 rounded-full bg-light focus:outline-none focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all duration-300">
+                        <i class="fa fa-search absolute left-3 text-gray-medium"></i>
+                        <!-- 搜索结果容器 -->
+                        <div id="desktopSearchResults" class="search-results hidden"></div>
+                    </div>
+                    
+                    <!-- 移动端菜单按钮 -->
+                    <button id="menuBtn" class="md:hidden text-dark hover:text-primary transition-colors">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex items-center relative mb-3">
+                    <input type="text" id="mobileSearch" placeholder="搜索分类..." class="pl-10 pr-4 py-2 rounded-full bg-light focus:outline-none focus:ring-2 focus:ring-primary/30 w-full transition-all duration-300">
+                    <i class="fa fa-search absolute left-3 text-gray-medium"></i>
+                    <!-- 移动端搜索结果容器 -->
+                    <div id="mobileSearchResults" class="search-results hidden"></div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <a href="#hero" class="px-4 py-2 text-gray-medium hover:text-primary transition-colors duration-200">首页</a>
+                    <a href="#categories" class="px-4 py-2 text-gray-medium hover:text-primary transition-colors duration-200">分类</a>
+                    <a href="#popular" class="px-4 py-2 text-gray-medium hover:text-primary transition-colors duration-200">热门</a>
+                    <a href="#latest" class="px-4 py-2 text-gray-medium hover:text-primary transition-colors duration-200">最新</a>
+                    <a href="#about" class="px-4 py-2 text-gray-medium hover:text-primary transition-colors duration-200">关于</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- 英雄区域 -->
+        <section id="hero" class="bg-gradient-to-br from-primary/5 to-secondary/5 py-12 md:py-20">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight mb-4">
+                        探索<span class="text-gradient">科技分类</span>的世界
+                    </h1>
+                    <p class="text-gray-medium text-lg md:text-xl mb-8">
+                        精准分类，快速查找，发现科技领域的每个细分方向
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="#categories" class="px-8 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                            浏览分类
+                        </a>
+                        <a href="#about" class="px-8 py-3 bg-white text-dark rounded-full font-medium hover:bg-gray-100 transition-all shadow-md">
+                            了解更多 <i class="fa fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 分类统计 -->
+        <section class="py-12 bg-white">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div class="p-6 rounded-xl bg-light/50">
+                        <div class="text-4xl font-bold text-primary mb-2">2</div>
+                        <div class="text-gray-medium">主要分类</div>
+                    </div>
+                    <div class="p-6 rounded-xl bg-light/50">
+                        <div class="text-4xl font-bold text-primary mb-2">12</div>
+                        <div class="text-gray-medium">子分类</div>
+                    </div>
+                    <div class="p-6 rounded-xl bg-light/50">
+                        <div class="text-4xl font-bold text-primary mb-2">91</div>
+                        <div class="text-gray-medium">相关资源</div>
+                    </div>
+                    <div class="p-6 rounded-xl bg-light/50">
+                        <div class="text-4xl font-bold text-primary mb-2">99%</div>
+                        <div class="text-gray-medium">用户满意度</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 主要分类 -->
+        <section id="categories" class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">主要分类</h2>
+                    <p class="text-gray-medium max-w-2xl mx-auto">探索我们精心策划的科技分类，从人工智能到云计算，覆盖前沿技术领域</p>
+                </div>
+
+                <!-- 分类筛选 -->
+                <div class="flex flex-wrap justify-center gap-2 mb-10">
+                    <button class="category-filter px-4 py-2 bg-primary text-white rounded-full text-sm font-medium" data-filter="all">全部</button>
+                    <button class="category-filter px-4 py-2 bg-white text-dark rounded-full text-sm font-medium hover:bg-light transition-colors" data-filter="娱乐">娱乐</button>
+                    <button class="category-filter px-4 py-2 bg-white text-dark rounded-full text-sm font-medium hover:bg-light transition-colors" data-filter="工具">工具</button>
+                    <button class="category-filter px-4 py-2 bg-white text-dark rounded-full text-sm font-medium hover:bg-light transition-colors" data-filter="-">-</button>
+                    <button class="category-filter px-4 py-2 bg-white text-dark rounded-full text-sm font-medium hover:bg-light transition-colors" data-filter="-">-</button>
+                    <button class="category-filter px-4 py-2 bg-white text-dark rounded-full text-sm font-medium hover:bg-light transition-colors" data-filter="-">-</button>
+                    <button class="category-filter px-4 py-2 bg-white text-dark rounded-full text-sm font-medium hover:bg-light transition-colors" data-filter="-">-</button>
+                </div>
+
+                <!-- 分类卡片 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- 分类卡片1 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="进阶版贪吃蛇">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">进阶版贪吃蛇</h3>
+                            <p class="text-gray-medium text-sm mb-4">采用经典贪吃蛇机制，通过键盘方向键控制蛇的移动（上、下、左、右）</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="进阶版贪吃蛇.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                        <!-- 分类卡片2 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="五子棋">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">五子棋</h3>
+                            <p class="text-gray-medium text-sm mb-4">采用经典五子棋机制，通过鼠标点击控制棋子</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="五子棋.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                            <!-- 分类卡片3 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="MBTI性格测试">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">MBTI性格测试</h3>
+                            <p class="text-gray-medium text-sm mb-4">一个有趣的MBTI性格测试工具，帮助你更好地了解自己和他人。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="MBTI.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                            <!-- 分类卡片4 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="工具" data-name="MBTI性格测试">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">高二丁课堂点名系统</h3>
+                            <p class="text-gray-medium text-sm mb-4">高二丁课堂点名系统，帮助老师快速、准确地点名。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">工具</span>
+                                <a href="抽签.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                                                <!-- 分类卡片5 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="工具" data-name="照片压缩工具">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">照片压缩工具</h3>
+                            <p class="text-gray-medium text-sm mb-4">照片压缩工具，帮助你压缩照片，减少文件大小。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">工具</span>
+                                <a href="照片压缩.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                                                <!-- 分类卡片6 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="中国象棋">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">中国象棋</h3>
+                            <p class="text-gray-medium text-sm mb-4">中国象棋，一个有趣的游戏，AI帮助你提升你的棋艺。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="中国象棋\index.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                                                                    <!-- 分类卡片7 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="数独">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">数独</h3>
+                            <p class="text-gray-medium text-sm mb-4">数独，一个有趣的游戏，帮助你提升你的数独能力。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="数独.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                                                                                                    <!-- 分类卡片6 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="色彩敏感度测试">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">色彩敏感度测试</h3>
+                            <p class="text-gray-medium text-sm mb-4">色彩敏感度测试，帮助你测试你的色彩敏感度。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="色彩敏感度.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                                                                                                    <!-- 分类卡片6 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="画圆测试">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">画圆测试</h3>
+                            <p class="text-gray-medium text-sm mb-4">画圆测试，帮助你测试你的画圆能力。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="画圆测试.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                                                                                        <!-- 分类卡片7 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="太空战机">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">太空战机</h3>
+                            <p class="text-gray-medium text-sm mb-4">太空战机，一个有趣的游戏，帮助你测试你的反应能力。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="太空战机.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                                                                                        <!-- 分类卡片7 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="终极塔防">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">终极塔防</h3>
+                            <p class="text-gray-medium text-sm mb-4">终极塔防，一个有趣的游戏，帮助你测试你的塔防能力。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="终极塔防.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                                                                                        <!-- 分类卡片7 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="舒尔特方格训练">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">舒尔特方格训练</h3>
+                            <p class="text-gray-medium text-sm mb-4">舒尔特方格训练，一个有趣的游戏，帮助你测试你的舒尔特方格能力。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="舒尔特方格训练.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                                                                                                                        <!-- 分类卡片7 -->
+                    <div class="category-card bg-white rounded-xl overflow-hidden shadow-md card-hover" data-category="娱乐" data-name="英文生字抽背练习">
+                        <div class="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-staff-snake"style="font-size: 50px;color: #ff0000;"></i>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2">英文生字抽背练习</h3>
+                            <p class="text-gray-medium text-sm mb-4">英文生字抽背练习，一个有趣的游戏，帮助你测试你的英文生字抽背练习能力。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-medium">娱乐</span>
+                                <a href="engtest.html" class="text-primary font-medium text-sm flex items-center gap-1">
+                                    查看 <i class="fa fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                <!-- 查看更多按钮 -->
+                <div class="text-center mt-10">
+                    <button class="px-6 py-3 border border-primary text-primary rounded-full font-medium hover:bg-primary/5 transition-all">
+                        查看全部分类 <i class="fa fa-chevron-down ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 热门子分类 -->
+        <section id="popular" class="py-16 bg-white">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                    <div>
+                        <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">热门子分类</h2>
+                        <p class="text-gray-medium max-w-2xl">这些是当前最受欢迎的细分领域，点击探索更多内容</p>
+                    </div>
+                    <a href="#" class="mt-4 md:mt-0 text-primary font-medium flex items-center gap-1 hover:underline">
+                        查看全部 <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- 子分类网格 -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <!-- 子分类项 -->
+                    <a href="#" class="bg-light rounded-lg p-4 text-center card-hover" data-name="机器学习">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa fa-brain text-primary"></i>
+                        </div>
+                        <h3 class="font-medium">机器学习</h3>
+                        <p class="text-xs text-gray-medium mt-1">1.2k 资源</p>
+                    </a>
+
+                    <a href="#" class="bg-light rounded-lg p-4 text-center card-hover" data-name="自然语言处理">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa fa-comment text-primary"></i>
+                        </div>
+                        <h3 class="font-medium">自然语言处理</h3>
+                        <p class="text-xs text-gray-medium mt-1">856 资源</p>
+                    </a>
+
+                    <a href="#" class="bg-light rounded-lg p-4 text-center card-hover" data-name="计算机视觉">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa fa-eye text-primary"></i>
+                        </div>
+                        <h3 class="font-medium">计算机视觉</h3>
+                        <p class="text-xs text-gray-medium mt-1">742 资源</p>
+                    </a>
+
+                    <a href="#" class="bg-light rounded-lg p-4 text-center card-hover" data-name="容器技术">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa fa-cubes text-primary"></i>
+                        </div>
+                        <h3 class="font-medium">容器技术</h3>
+                        <p class="text-xs text-gray-medium mt-1">631 资源</p>
+                    </a>
+
+                    <a href="#" class="bg-light rounded-lg p-4 text-center card-hover" data-name="数据分析">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa fa-line-chart text-primary"></i>
+                        </div>
+                        <h3 class="font-medium">数据分析</h3>
+                        <p class="text-xs text-gray-medium mt-1">928 资源</p>
+                    </a>
+
+                    <a href="#" class="bg-light rounded-lg p-4 text-center card-hover" data-name="增强现实">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa fa-vr-cardboard text-primary"></i>
+                        </div>
+                        <h3 class="font-medium">增强现实</h3>
+                        <p class="text-xs text-gray-medium mt-1">547 资源</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 最新添加 -->
+        <section id="latest" class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                    <div>
+                        <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">最新添加分类</h2>
+                        <p class="text-gray-medium max-w-2xl">最近更新的科技分类，把握最新技术趋势</p>
+                    </div>
+                    <a href="#" class="mt-4 md:mt-0 text-primary font-medium flex items-center gap-1 hover:underline">
+                        查看全部 <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md card-hover" data-name="量子计算">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fa fa-atom text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-1">量子计算</h3>
+                                <p class="text-gray-medium text-sm mb-2">量子算法、量子比特和量子加密技术</p>
+                                <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">2天前添加</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-md card-hover" data-name="边缘计算">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fa fa-microchip text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-1">边缘计算</h3>
+                                <p class="text-gray-medium text-sm mb-2">分布式计算、边缘设备和低延迟处理</p>
+                                <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">5天前添加</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-md card-hover" data-name="数字孪生">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fa fa-clone text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-1">数字孪生</h3>
+                                <p class="text-gray-medium text-sm mb-2">虚拟建模、实时仿真和数字镜像技术</p>
+                                <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">1周前添加</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 关于我们 -->
+        <section id="about" class="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">关于我们的分类系统</h2>
+                    <p class="text-gray-medium max-w-2xl mx-auto">我们的科技分类系统由行业专家精心设计，旨在帮助您快速找到所需的技术资源</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- 特点1 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                        <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-5">
+                            <i class="fa fa-sitemap text-primary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-3">科学分类体系</h3>
+                        <p class="text-gray-medium">基于技术关联性和应用场景构建的分类结构，符合行业认知习惯。</p>
+                    </div>
+
+                    <!-- 特点2 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                        <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-5">
+                            <i class="fa fa-sync text-primary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-3">实时更新</h3>
+                        <p class="text-gray-medium">随着科技发展不断更新分类体系，确保覆盖最新技术领域和趋势。</p>
+                    </div>
+
+                    <!-- 特点3 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                        <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-5">
+                            <i class="fa fa-search text-primary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-3">精准搜索</h3>
+                        <p class="text-gray-medium">强大的搜索功能帮助您快速定位所需分类，支持模糊搜索和关键词联想。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 订阅区域 -->
+        <section class="py-16 bg-primary">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="max-w-3xl mx-auto text-center text-white">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">获取最新分类更新</h2>
+                    <p class="mb-8 opacity-90">订阅我们的通讯，及时了解新分类的添加和科技领域的最新动态</p>
+                    
+                    <form class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                        <input type="email" placeholder="输入您的邮箱地址" class="flex-1 px-4 py-3 rounded-full focus:outline-none text-dark">
+                        <button type="submit" class="px-6 py-3 bg-dark text-white rounded-full font-medium hover:bg-opacity-90 transition-all">
+                            订阅 <i class="fa fa-paper-plane ml-2"></i>
+                        </button>
+                    </form>
+                    
+                    <p class="text-xs mt-4 opacity-80">我们尊重您的隐私，不会向第三方分享您的信息</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white pt-16 pb-8">
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <!-- 关于我们 -->
+                <div>
+                    <div class="flex items-center gap-2 mb-5">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                            <i class="fa fa-cubes text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold">TechClass</span>
+                    </div>
+                    <p class="text-gray-400 mb-5">专业的科技分类导航平台，帮助您快速找到所需的科技资源和信息。</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-github"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 快速链接 -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-5">快速链接</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#hero" class="text-gray-400 hover:text-white transition-colors">首页</a></li>
+                        <li><a href="#categories" class="text-gray-400 hover:text-white transition-colors">所有分类</a></li>
+                        <li><a href="#popular" class="text-gray-400 hover:text-white transition-colors">热门资源</a></li>
+                        <li><a href="#latest" class="text-gray-400 hover:text-white transition-colors">最新添加</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">关于我们</a></li>
+                    </ul>
+                </div>
+
+                <!-- 分类 -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-5">热门分类</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">人工智能</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">云计算</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">大数据</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">区块链</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">物联网</a></li>
+                    </ul>
+                </div>
+
+                <!-- 联系我们 -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-5">联系我们</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i class="fa fa-envelope text-primary mt-1"></i>
+                            <span class="text-gray-400">contact@techclass.com</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa fa-map-marker text-primary mt-1"></i>
+                            <span class="text-gray-400">北京市海淀区科技园区88号</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa fa-phone text-primary mt-1"></i>
+                            <span class="text-gray-400">+86 10 8888 7777</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+                <p>&copy; 2023 TechClass. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 移动端菜单切换
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            // 切换图标
+            const icon = menuBtn.querySelector('i');
+            if (icon.classList.contains('fa-bars')) {
+                icon.classList.replace('fa-bars', 'fa-times');
+            } else {
+                icon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+
+        // 滚动时导航栏效果
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('shadow');
+                header.classList.remove('shadow-sm');
+            } else {
+                header.classList.remove('shadow');
+                header.classList.add('shadow-sm');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // 如果是移动端，点击后关闭菜单
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                        const icon = menuBtn.querySelector('i');
+                        icon.classList.replace('fa-times', 'fa-bars');
+                    }
+                }
+            });
+        });
+
+        // 分类筛选功能
+        const filterButtons = document.querySelectorAll('.category-filter');
+        const categoryCards = document.querySelectorAll('.category-card');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // 更新按钮样式
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('bg-white', 'text-dark', 'hover:bg-light');
+                });
+                
+                button.classList.remove('bg-white', 'text-dark', 'hover:bg-light');
+                button.classList.add('bg-primary', 'text-white');
+                
+                const filter = button.getAttribute('data-filter');
+                
+                // 筛选并动画显示卡片
+                categoryCards.forEach(card => {
+                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                        // 显示卡片并添加动画
+                        card.style.display = 'block';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'scale(1)';
+                        }, 50);
+                    } else {
+                        // 隐藏卡片并添加动画
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.8)';
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            });
+        });
+
+        // 搜索功能实现
+        function setupSearch(searchInputId, searchResultsId) {
+            const searchInput = document.getElementById(searchInputId);
+            const searchResults = document.getElementById(searchResultsId);
+            
+            // 获取所有可搜索项
+            const searchableItems = [];
+            
+            // 使用 IIFE 延迟数据收集，确保DOM加载完成
+            setTimeout(() => {
+                // 收集分类卡片
+                document.querySelectorAll('.category-card[data-name]').forEach(card => {
+                    searchableItems.push({
+                        name: card.getAttribute('data-name'),
+                        category: card.getAttribute('data-category'),
+                        type: 'category',
+                        element: card
+                    });
+                });
+                
+                // 收集热门子分类
+                document.querySelectorAll('#popular a[data-name]').forEach(item => {
+                    searchableItems.push({
+                        name: item.getAttribute('data-name'),
+                        type: 'subcategory',
+                        element: item
+                    });
+                });
+                
+                // 收集最新添加
+                document.querySelectorAll('#latest .card-hover[data-name]').forEach(item => {
+                    searchableItems.push({
+                        name: item.getAttribute('data-name'),
+                        type: 'latest',
+                        element: item
+                    });
+                });
+            }, 500); // 延迟500毫秒执行
+
+            
+            // 搜索输入事件
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                
+                if (searchTerm.length < 1) {
+                    searchResults.classList.add('hidden');
+                    return;
+                }
+                
+                // 过滤匹配项
+                const matches = searchableItems.filter(item => 
+                    item.name.toLowerCase().includes(searchTerm) || 
+                    (item.category && item.category.toLowerCase().includes(searchTerm))
+                );
+                
+                // 显示结果
+                displaySearchResults(matches, searchResults, searchTerm);
+            });
+            
+            // 点击页面其他地方关闭搜索结果
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+            
+            // 阻止搜索结果容器内的点击事件冒泡
+            searchResults.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
+        // 显示搜索结果
+        function displaySearchResults(matches, container, searchTerm) {
+            container.innerHTML = '';
+            
+            if (matches.length === 0) {
+                const noResult = document.createElement('div');
+                noResult.className = 'search-result-item';
+                noResult.innerHTML = `<i class="fa fa-search-minus mr-2 text-gray-medium"></i> 没有找到与 "${searchTerm}" 相关的结果`;
+                container.appendChild(noResult);
+                container.classList.remove('hidden');
+                return;
+            }
+            
+            // 按匹配程度排序
+            matches.sort((a, b) => {
+                const aName = a.name.toLowerCase();
+                const bName = b.name.toLowerCase();
+                const aIndex = aName.indexOf(searchTerm);
+                const bIndex = bName.indexOf(searchTerm);
+
+                if (aIndex === 0 && bIndex !== 0) return -1;
+                if (bIndex === 0 && aIndex !== 0) return 1;
+                if (aIndex !== -1 && bIndex === -1) return -1;
+                if (bIndex !== -1 && aIndex === -1) return 1;
+                return aIndex - bIndex;
+            });
+            
+            // 限制显示结果数量
+            const displayMatches = matches.slice(0, 8);
+            
+            displayMatches.forEach(item => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                
+                // 高亮匹配文本
+                const highlightText = (text, term) => {
+                    if (!term) return text;
+                    const regex = new RegExp(`(${term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\\\$&')})`, 'gi');
+                    return text.replace(regex, '<strong class="font-bold text-primary">$1</strong>');
+                };
+                
+                // 设置结果项内容
+                let typeIcon = '';
+                switch(item.type) {
+                    case 'category':
+                        typeIcon = '<i class="fa fa-folder-open mr-2 text-primary"></i>';
+                        break;
+                    case 'subcategory':
+                        typeIcon = '<i class="fa fa-folder mr-2 text-secondary"></i>';
+                        break;
+                    case 'latest':
+                        typeIcon = '<i class="fa fa-clock-o mr-2 text-green-500"></i>';
+                        break;
+                }
+                
+                resultItem.innerHTML = `${typeIcon}${highlightText(item.name, searchTerm)}`;
+                
+                // 点击结果项的处理
+                resultItem.addEventListener('click', () => {
+                    item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    item.element.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'transition-all', 'duration-300');
+                    setTimeout(() => {
+                        item.element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+                    }, 2500);
+                    
+                    document.getElementById('desktopSearch').value = '';
+                    document.getElementById('mobileSearch').value = '';
+                    container.classList.add('hidden');
+                });
+                
+                container.appendChild(resultItem);
+            });
+            container.classList.remove('hidden');
+        }
+        
+        // 初始化搜索功能
+        setupSearch('desktopSearch', 'desktopSearchResults');
+        setupSearch('mobileSearch', 'mobileSearchResults');
+    </script>
+    <script src="https://kit.fontawesome.com/f058844161.js" crossorigin="anonymous"></script>
+</body>
+</html>
+    
