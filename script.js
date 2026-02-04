@@ -344,5 +344,7 @@ if (slider) {
             inter: ['Inter', 'system-ui', 'sans-serif'],
           },
         },
+        
       }
     }
+    

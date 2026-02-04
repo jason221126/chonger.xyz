@@ -1,1332 +1,888 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NexTech - 未来科技解决方案</title>
-  <!-- 引入外部资源 -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
-  
-  <!-- 预加载字体 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chonger - 个人主页</title>
+    <!-- 引入LeanCloud SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.2/dist/av-min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            background: #ffffff;
+            color: #1d1d1f;
+            overflow-x: hidden;
+        }
+
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 5%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        nav.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 15px 5%;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-logo:hover {
+            color: #06c;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            margin: 0;
+        }
+
+        nav ul a {
+            text-decoration: none;
+            color: #1d1d1f;
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 0;
+        }
+
+        nav ul a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 1px;
+            background: #1d1d1f;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        nav ul a:hover {
+            color: #06c;
+        }
+
+        nav ul a:hover::after {
+            width: 100%;
+        }
+
+        /* 新增：汉堡按钮样式 */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #1d1d1f;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* 英雄区 - 关键修改：添加顶部内边距，避免被固定导航遮挡 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, 
+                #f5f7fa 0%, 
+                #c3cfe2 50%, 
+                #f5f7fa 100%);
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px; /* 新增：给英雄区顶部留导航栏的高度 */
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, 
+                rgba(255, 255, 255, 0.3) 0%, 
+                transparent 70%);
+            animation: float 15s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 80px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #1d1d1f 0%, #4a4a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 24px;
+            font-weight: 300;
+            color: #6e6e73;
+            margin-bottom: 60px;
+            letter-spacing: 0.5px;
+        }
+
+        /* 统计卡片 */
+        .stats-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 900px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: 0.6s;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px 40px;
+            min-width: 200px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 600;
+            color: #06c;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6e6e73;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* 滚动提示 */
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            animation: fadeIn 1s ease forwards, bounce 2s ease-in-out infinite;
+            animation-delay: 1.5s, 2s;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        .scroll-hint svg {
+            width: 30px;
+            height: 30px;
+            stroke: #6e6e73;
+        }
+
+        /* 通用区块样式 */
+        .section {
+            padding: 120px 5%;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 80px;
+            letter-spacing: -1px;
+            color: #1d1d1f;
+        }
+
+        /* 关于区域 */
+        .about-section {
+            background: #fafafa;
+        }
+
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .about-text {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .about-text p {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #6e6e73;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .about-tags {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #1d1d1f;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            background: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 资料区域 */
+        .resources-section {
+            background: #ffffff;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .resource-card {
+            background: #fafafa;
+            border-radius: 20px;
+            padding: 40px 30px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .resource-card:hover {
+            background: #ffffff;
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .resource-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .resource-card h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1d1d1f;
+        }
+
+        .resource-card p {
+            font-size: 15px;
+            color: #6e6e73;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .resource-link {
+            color: #06c;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .resource-link:hover {
+            transform: translateX(5px);
+        }
+
+        /* 小游戏区域 */
+        .games-section {
+            background: #fafafa;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+        }
+
+        .game-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .game-preview {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .game-card h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1d1d1f;
+        }
+
+        .game-card p {
+            font-size: 14px;
+            color: #6e6e73;
+            margin-bottom: 25px;
+        }
+
+        .play-btn {
+            background: #06c;
+            color: #ffffff;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn:hover {
+            background: #0077ed;
+            transform: scale(1.05);
+        }
+
+        .play-btn.disabled {
+            background: #d1d1d6;
+            cursor: not-allowed;
+        }
+
+        .play-btn.disabled:hover {
+            transform: none;
+        }
+
+        /* 更多区域 */
+        .more-section {
+            background: #ffffff;
+        }
+
+        .more-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-info h3 {
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1d1d1f;
+        }
+
+        .contact-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 30px 20px;
+            background: #fafafa;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #1d1d1f;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .contact-item:hover {
+            background: #ffffff;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .contact-icon {
+            font-size: 32px;
+        }
+
+        .contact-item span:last-child {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* 页脚 */
+        .footer {
+            background: #fafafa;
+            padding: 60px 5%;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .footer p {
+            font-size: 14px;
+            color: #6e6e73;
+            font-weight: 300;
+        }
+
+        /* 响应式补充 - 关键修改 */
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 20px;
+            }
+
+            nav ul a {
+                font-size: 14px;
+            }
+
+            .nav-logo {
+                font-size: 18px;
+            }
+
+            .hero h1 {
+                font-size: 48px;
+            }
+
+            .hero .subtitle {
+                font-size: 18px;
+                padding: 0 20px;
+            }
+
+            .stats-container {
+                gap: 20px;
+                padding: 0 20px;
+            }
+
+            .stat-card {
+                min-width: 150px;
+                padding: 25px 30px;
+            }
+
+            .stat-number {
+                font-size: 36px;
+            }
+
+            .stat-label {
+                font-size: 13px;
+            }
+
+            .section {
+                padding: 80px 5%;
+            }
+
+            .section-title {
+                font-size: 36px;
+                margin-bottom: 50px;
+            }
+
+            .about-text p {
+                font-size: 18px;
+            }
+
+            .resources-grid,
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .contact-links {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* 关键修改：手机端显示汉堡按钮，隐藏默认导航列表 */
+            .hamburger {
+                display: block;
+            }
+
+            nav ul {
+                display: none;
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 200px;
+                height: 100vh;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: center;
+                gap: 30px;
+                padding: 20px;
+                box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+            }
+
+            /* 激活状态：显示导航列表 */
+            nav ul.active {
+                display: flex;
+            }
+
+            .nav-container {
+                justify-content: space-between; /* 恢复两端对齐，显示logo和汉堡按钮 */
+            }
+
+            /* 手机端英雄区调整 */
+            .hero {
+                padding-top: 60px; /* 适配手机端导航栏高度 */
+            }
+        }
+    </style>
 </head>
+<body>
+    <!-- 导航栏 - 新增汉堡按钮 -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#home" class="nav-logo">Chonger</a>
+            <button class="hamburger">☰</button> <!-- 新增汉堡按钮 -->
+            <ul id="nav-menu">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#about">关于</a></li>
+                <li><a href="#resources">资料</a></li>
+                <li><a href="#games">小程序</a></li>
+                <li><a href="#more">更多</a></li>
+            </ul>
+        </div>
+    </nav>
 
-<body class="font-inter bg-dark text-light overflow-x-hidden">
-  <!-- 导航栏 -->
-  <header id="navbar" class="fixed w-full z-50 transition-all duration-500 py-4 bg-darker/60 backdrop-blur-lg">
-    <div class="container mx-auto px-4 md:px-8">
-      <nav class="flex items-center justify-between">
-        <a href="#" class="flex items-center gap-2">
-          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <span class="text-white font-bold text-xl">虫</span>
-          </div>
-          <span class="text-xl font-bold tracking-tight">Chonger</span>
-        </a>
-        
-        <!-- 桌面导航 -->
-        <div class="hidden md:flex items-center space-x-8">
-          <a href="#home" class="nav-link text-light/80 hover:text-white transition-colors">首页</a>
-          
-          <!-- 产品下拉菜单 -->
-          <div class="dropdown">
-            <a href="#products" class="nav-link text-light/80 hover:text-white transition-colors flex items-center gap-1">
-              产品 <i class="fa fa-angle-down text-xs"></i>
-            </a>
-            <div class="dropdown-menu">
-              <a href="kjfl\fl.html" class="dropdown-item">科技分类</a>
-              <a href="打印服务\打印.html" class="dropdown-item">打印服务</a>
-              <a href="#" class="dropdown-item">-</a>
-              <a href="#" class="dropdown-item">-</a>
-              <a href="#" class="dropdown-item">-</a>
-            </div>
-          </div>
-          
-          <!-- 解决方案下拉菜单 -->
-          <div class="dropdown">
-            <a href="#features" class="nav-link text-light/80 hover:text-white transition-colors flex items-center gap-1">
-              解决方案 <i class="fa fa-angle-down text-xs"></i>
-            </a>
-            <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">-</a>
-              <a href="#" class="dropdown-item">-</a>
-              <a href="#" class="dropdown-item">-</a>
-              <a href="#" class="dropdown-item">-</a>
-              <a href="#" class="dropdown-item">-</a>
-            </div>
-          </div>
-          
-          <a href="#insights" class="nav-link text-light/80 hover:text-white transition-colors">洞察</a>
-          <a href="#about" class="nav-link text-light/80 hover:text-white transition-colors">关于我们</a>
-          <a href="#contact" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-all hover:shadow-lg hover:shadow-primary/20">联系我们</a>
-        </div>
-        
-        <!-- 移动端菜单按钮 -->
-        <button id="menu-toggle" class="md:hidden text-white text-2xl">
-          <i class="fa fa-bars"></i>
-        </button>
-      </nav>
-    </div>
-    
-    <!-- 移动端导航菜单 -->
-    <div id="mobile-menu" class="md:hidden fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
-      <div class="container mx-auto px-6 py-8">
-        <div class="flex justify-between items-center mb-12">
-          <a href="#" class="flex items-center gap-2">
-            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span class="text-white font-bold text-xl">N</span>
-            </div>
-            <span class="text-xl font-bold tracking-tight">NexTech</span>
-          </a>
-          <button id="menu-close" class="text-white text-2xl">
-            <i class="fa fa-times"></i>
-          </button>
-        </div>
-        
-        <div class="flex flex-col space-y-6">
-          <a href="#home" class="text-2xl font-medium text-light/80 hover:text-white transition-colors mobile-nav-link">首页</a>
-          
-          <!-- 移动端产品菜单 -->
-          <div class="mobile-dropdown">
-            <a href="#products" class="text-2xl font-medium text-light/80 hover:text-white transition-colors mobile-nav-link flex items-center justify-between">
-              产品 <i class="fa fa-angle-down"></i>
-            </a>
-            <div class="mobile-dropdown-menu mt-3 pl-4 hidden">
-              <a href="kjfl\fl.html" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">科技分类</a>
-              <a href="打印服务\打印.html" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">打印服务</a>
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
-            </div>
-          </div>
-          
-          <!-- 移动端解决方案菜单 -->
-          <div class="mobile-dropdown">
-            <a href="#features" class="text-2xl font-medium text-light/80 hover:text-white transition-colors mobile-nav-link flex items-center justify-between">
-              解决方案 <i class="fa fa-angle-down"></i>
-            </a>
-            <div class="mobile-dropdown-menu mt-3 pl-4 hidden">
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
-              <a href="#" class="block text-xl text-light/60 hover:text-white py-2 transition-colors">-</a>
-            </div>
-          </div>
-          
-          <a href="#insights" class="text-2xl font-medium text-light/80 hover:text-white transition-colors mobile-nav-link">洞察</a>
-          <a href="#about" class="text-2xl font-medium text-light/80 hover:text-white transition-colors mobile-nav-link">关于我们</a>
-          <a href="#contact" class="mt-4 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg text-center text-lg transition-all">联系我们</a>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- 英雄区域 -->
-  <section id="home" class="min-h-screen flex items-center relative overflow-hidden pt-20 bg-grid">
-    <!-- 背景装饰 -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute top-1/4 -left-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-secondary/20 rounded-full blur-3xl"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
-    </div>
-    
-    <div class="container mx-auto px-4 md:px-8 z-10 py-20">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
-        <div class="space-y-8 max-w-2xl">
-          <div class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium animate-on-scroll">
-            重新定义科技体验
-          </div>
-          
-          <h1 class="text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-tight animate-on-scroll" style="animation-delay: 0.1s">
-            慢下脚步<br>
-            <span class="bg-gradient-to-r from-primary to-secondary text-gradient">让心灵照亮前行的路</span>
-          </h1>
-          
-          <p class="text-light/70 text-lg md:text-xl animate-on-scroll" style="animation-delay: 0.2s">
-            我们提供前沿的科技解决方案，帮助企业实现数字化转型，提升效率并创造全新的用户体验。
-          </p>
-          
-          <div class="flex flex-wrap gap-4 animate-on-scroll" style="animation-delay: 0.3s">
-            <a href="#products" class="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-primary/20 font-medium">
-              探索产品
-            </a>
-            <a href="#demo" class="bg-transparent border border-light/20 hover:border-light/40 text-white px-8 py-3 rounded-lg transition-all flex items-center gap-2 font-medium">
-              <i class="fa fa-play-circle-o"></i> 观看演示
-            </a>
-          </div>
-          
-          <div class="pt-6 animate-on-scroll" style="animation-delay: 0.4s">
-            <div class="flex items-center gap-2 text-light/50 text-sm mb-3">
-              <div class="flex -space-x-2">
-                <img src="img\微信图片_20250915175723_390_3.jpg" alt="用户头像" class="w-8 h-8 rounded-full border-2 border-dark">
-                <img src="https://picsum.photos/id/1002/40/40" alt="用户头像" class="w-8 h-8 rounded-full border-2 border-dark">
-                <img src="https://picsum.photos/id/1003/40/40" alt="用户头像" class="w-8 h-8 rounded-full border-2 border-dark">
-                <img src="https://picsum.photos/id/1004/40/40" alt="用户头像" class="w-8 h-8 rounded-full border-2 border-dark">
-                <div class="w-8 h-8 rounded-full border-2 border-dark bg-primary/20 flex items-center justify-center text-xs font-medium">
-                  200+
-                </div>
-              </div>
-              <span>全球客户的信赖之选</span>
-            </div>
+    <!-- 英雄区 -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>chonger</h1>
+            <p class="subtitle">网站主页 ・ 资料分享 ・ 小游戏</p>
             
-            <div class="flex items-center gap-4">
-              <div class="flex items-center gap-1 text-yellow-400">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star-half-o"></i>
-                <span class="ml-1 text-light/70">4.8/5</span>
-              </div>
-              <div class="text-light/50 text-sm">来自500+条评价</div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="relative animate-on-scroll">
-          <div class="relative z-10 rounded-2xl overflow-hidden border border-light/10 bg-darker/50 backdrop-blur-sm shadow-xl">
-            <img src="img\微信图片_20250915175723_390_3.jpg" alt="未来科技产品展示" class="w-full h-auto">
-            <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
-            <div class="absolute bottom-0 left-0 p-6">
-              <span class="text-xs font-medium px-3 py-1 bg-primary/20 text-primary rounded-full">品牌代言人</span>
-              <h3 class="text-xl font-bold mt-2">李淦荣</h3>
-              <p class="text-light/60 text-sm mt-1">代言人</p>
-            </div>
-          </div>
-          
-          <!-- 悬浮元素 -->
-          <div class="absolute -top-6 -right-6 w-32 h-32 bg-primary/10 border border-primary/20 rounded-xl flex flex-col items-center justify-center animate-float">
-            <div class="text-3xl font-bold text-primary">99.9%</div>
-            <div class="text-xs text-light/60 text-center mt-1">系统稳定性</div>
-          </div>
-          
-          <div class="absolute -bottom-8 -left-8 w-40 h-40 bg-secondary/10 border border-secondary/20 rounded-xl p-4 animate-float-delay-1">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
-              <div class="text-xs text-secondary font-medium">实时监控</div>
-            </div>
-            <div class="w-full h-24 bg-darker/50 rounded-lg overflow-hidden">
-              <canvas id="miniChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-<!-- 横向并列的统计卡片容器 -->
-<div class="count-wrapper">
-  <div class="count-card">
-    <div class="count-title">总浏览量</div>
-    <div class="count-num" id="total-count">0</div>
-  </div>
-  <div class="count-card">
-    <div class="count-title">今日浏览量</div>
-    <div class="count-num" id="daily-count">0</div>
-  </div>
-</div>
-    
-    <!-- 向下滚动指示 -->
-    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-      <a href="#products" class="text-light/50 hover:text-white transition-colors">
-        <i class="fa fa-angle-down text-2xl"></i>
-      </a>
-    </div>
-  </section>
-
-  <!-- 产品展示区 -->
-  <section id="products" class="py-24 relative bg-darker">
-    <div class="container mx-auto px-4 md:px-8">
-      <div class="text-center max-w-3xl mx-auto mb-16 animate-on-scroll">
-        <span class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium mb-4">
-          项目系列
-        </span>
-        <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-4">
-          项目产品
-        </h2>
-        <p class="text-light/70 text-lg">
-          设计及开发项目总结，不限于开发完成的项目，包括一些产品概念...
-        </p>
-      </div>
-      
-      <!-- 产品分类标签 -->
-      <div class="flex flex-wrap justify-center gap-3 mb-12 animate-on-scroll">
-        <button class="product-tab active px-5 py-2 rounded-full bg-primary text-white text-sm font-medium transition-all">
-          全部产品
-        </button>
-        <button class="product-tab px-5 py-2 rounded-full bg-light/5 hover:bg-light/10 text-light/70 hover:text-white text-sm font-medium transition-all">
-          智能硬件
-        </button>
-        <button class="product-tab px-5 py-2 rounded-full bg-light/5 hover:bg-light/10 text-light/70 hover:text-white text-sm font-medium transition-all">
-          软件解决方案
-        </button>
-        <button class="product-tab px-5 py-2 rounded-full bg-light/5 hover:bg-light/10 text-light/70 hover:text-white text-sm font-medium transition-all">
-          云服务
-        </button>
-        <button class="product-tab px-5 py-2 rounded-full bg-light/5 hover:bg-light/10 text-light/70 hover:text-white text-sm font-medium transition-all">
-          物联网
-        </button>
-      </div>
-      
-      <!-- 产品网格 -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <!-- 产品卡片 1 -->
-        <div class="group bg-dark border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll">
-          <div class="relative overflow-hidden">
-            <img src="https://picsum.photos/id/2/600/400" alt="Nexus Pro 智能终端" class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute top-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-primary/90 text-white rounded-full">畅销产品</span>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <button class="absolute bottom-4 right-4 bg-white text-dark p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-              <i class="fa fa-arrow-right"></i>
-            </button>
-          </div>
-          <div class="p-6">
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-xl font-bold group-hover:text-primary transition-colors">Nexus Pro 智能终端</h3>
-              <span class="text-lg font-semibold">¥2,999</span>
-            </div>
-            <p class="text-light/60 text-sm mb-4">
-              集计算、通信和娱乐于一体的下一代智能终端，搭载最新量子处理器。
-            </p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1 text-yellow-400 text-sm">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <span class="ml-1 text-light/60">(128)</span>
-              </div>
-              <button class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 transition-colors">
-                查看详情 <i class="fa fa-angle-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 产品卡片 2 -->
-        <div class="group bg-dark border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll" style="animation-delay: 0.1s">
-          <div class="relative overflow-hidden">
-            <img src="https://picsum.photos/id/3/600/400" alt="Aura 智能家居系统" class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute top-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-secondary/90 text-white rounded-full">新品</span>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <button class="absolute bottom-4 right-4 bg-white text-dark p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-              <i class="fa fa-arrow-right"></i>
-            </button>
-          </div>
-          <div class="p-6">
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-xl font-bold group-hover:text-secondary transition-colors">Aura 智能家居系统</h3>
-              <span class="text-lg font-semibold">¥4,599</span>
-            </div>
-            <p class="text-light/60 text-sm mb-4">
-              全方位的智能家居解决方案，实现家居设备的无缝连接和智能控制。
-            </p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1 text-yellow-400 text-sm">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star-half-o"></i>
-                <span class="ml-1 text-light/60">(86)</span>
-              </div>
-              <button class="text-secondary hover:text-secondary/80 text-sm font-medium flex items-center gap-1 transition-colors">
-                查看详情 <i class="fa fa-angle-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 产品卡片 3 -->
-        <div class="group bg-dark border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll" style="animation-delay: 0.2s">
-          <div class="relative overflow-hidden">
-            <img src="https://picsum.photos/id/4/600/400" alt="Vortex 云服务平台" class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute top-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-accent/90 text-white rounded-full">热门选择</span>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <button class="absolute bottom-4 right-4 bg-white text-dark p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-              <i class="fa fa-arrow-right"></i>
-            </button>
-          </div>
-          <div class="p-6">
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-xl font-bold group-hover:text-accent transition-colors">Vortex 云服务平台</h3>
-              <span class="text-lg font-semibold">¥999/年</span>
-            </div>
-            <p class="text-light/60 text-sm mb-4">
-              高性能云计算平台，提供弹性计算、存储和网络服务，满足企业级需求。
-            </p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1 text-yellow-400 text-sm">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star-o"></i>
-                <span class="ml-1 text-light/60">(215)</span>
-              </div>
-              <button class="text-accent hover:text-accent/80 text-sm font-medium flex items-center gap-1 transition-colors">
-                查看详情 <i class="fa fa-angle-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 产品卡片 4 -->
-        <div class="group bg-dark border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll" style="animation-delay: 0.3s">
-          <div class="relative overflow-hidden">
-            <img src="https://picsum.photos/id/5/600/400" alt="Pulse 健康监测手环" class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute top-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-green-500/90 text-white rounded-full">限时优惠</span>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <button class="absolute bottom-4 right-4 bg-white text-dark p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-              <i class="fa fa-arrow-right"></i>
-            </button>
-          </div>
-          <div class="p-6">
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-xl font-bold group-hover:text-primary transition-colors">Pulse 健康监测手环</h3>
-              <div>
-                <span class="text-lg font-semibold">¥699</span>
-                <span class="text-light/50 text-sm line-through ml-2">¥899</span>
-              </div>
-            </div>
-            <p class="text-light/60 text-sm mb-4">
-              全天候健康监测设备，实时追踪心率、睡眠质量和活动数据，助您保持健康生活。
-            </p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1 text-yellow-400 text-sm">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star-half-o"></i>
-                <span class="ml-1 text-light/60">(342)</span>
-              </div>
-              <button class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 transition-colors">
-                查看详情 <i class="fa fa-angle-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 产品卡片 5 -->
-        <div class="group bg-dark border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll" style="animation-delay: 0.4s">
-          <div class="relative overflow-hidden">
-            <img src="https://picsum.photos/id/6/600/400" alt="NexAI 人工智能助手" class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute top-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-primary/90 text-white rounded-full">畅销产品</span>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <button class="absolute bottom-4 right-4 bg-white text-dark p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-              <i class="fa fa-arrow-right"></i>
-            </button>
-          </div>
-          <div class="p-6">
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-xl font-bold group-hover:text-primary transition-colors">NexAI 人工智能助手</h3>
-              <span class="text-lg font-semibold">¥1,299</span>
-            </div>
-            <p class="text-light/60 text-sm mb-4">
-              基于先进AI技术的智能助手，可处理语音指令、提供信息查询和自动化任务处理。
-            </p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1 text-yellow-400 text-sm">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <span class="ml-1 text-light/60">(187)</span>
-              </div>
-              <button class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 transition-colors">
-                查看详情 <i class="fa fa-angle-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 产品卡片 6 -->
-        <div class="group bg-dark border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll" style="animation-delay: 0.5s">
-          <div class="relative overflow-hidden">
-            <img src="https://picsum.photos/id/7/600/400" alt="Mesh 物联网套件" class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute top-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-secondary/90 text-white rounded-full">新品</span>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <button class="absolute bottom-4 right-4 bg-white text-dark p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-              <i class="fa fa-arrow-right"></i>
-            </button>
-          </div>
-          <div class="p-6">
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-xl font-bold group-hover:text-secondary transition-colors">Mesh 物联网套件</h3>
-              <span class="text-lg font-semibold">¥1,899</span>
-            </div>
-            <p class="text-light/60 text-sm mb-4">
-              完整的物联网开发套件，包含传感器、控制器和云平台接入，快速构建智能应用。
-            </p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1 text-yellow-400 text-sm">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star-o"></i>
-                <span class="ml-1 text-light/60">(42)</span>
-              </div>
-              <button class="text-secondary hover:text-secondary/80 text-sm font-medium flex items-center gap-1 transition-colors">
-                查看详情 <i class="fa fa-angle-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 查看更多按钮 -->
-      <div class="text-center mt-16 animate-on-scroll">
-        <a href="#" class="inline-flex items-center gap-2 px-8 py-3 border border-light/20 hover:border-primary hover:bg-primary/5 text-white rounded-lg transition-all font-medium">
-          查看全部产品 <i class="fa fa-long-arrow-right"></i>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 特性展示区 -->
-  <section id="features" class="py-24 relative bg-dark overflow-hidden">
-    <!-- 背景装饰 -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute top-1/3 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-1/3 -left-40 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
-    </div>
-    
-    <div class="container mx-auto px-4 md:px-8 relative z-10">
-      <div class="grid md:grid-cols-2 gap-16 items-center">
-        <div class="animate-on-scroll">
-          <span class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium mb-4">
-            核心特性
-          </span>
-          <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-6">
-            领先技术，<br>卓越体验
-          </h2>
-          <p class="text-light/70 text-lg mb-8">
-            我们的产品融合了多项创新技术，为用户提供前所未有的使用体验，帮助您在数字时代保持领先地位。
-          </p>
-          
-          <!-- 特性列表 -->
-          <div class="space-y-6">
-            <!-- 特性 1 -->
-            <div class="flex gap-4 group">
-              <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
-                <i class="fa fa-bolt text-xl"></i>
-              </div>
-              <div>
-                <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">超高性能</h3>
-                <p class="text-light/60">搭载最新一代处理器和优化算法，提供卓越的运行速度和响应能力，轻松应对复杂任务。</p>
-              </div>
-            </div>
-            
-            <!-- 特性 2 -->
-            <div class="flex gap-4 group">
-              <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary flex-shrink-0 group-hover:bg-secondary group-hover:text-white transition-all">
-                <i class="fa fa-shield text-xl"></i>
-              </div>
-              <div>
-                <h3 class="text-xl font-bold mb-2 group-hover:text-secondary transition-colors">银行级安全</h3>
-                <p class="text-light/60">采用端到端加密和多重身份验证技术，确保您的数据安全，防止未授权访问和信息泄露。</p>
-              </div>
-            </div>
-            
-            <!-- 特性 3 -->
-            <div class="flex gap-4 group">
-              <div class="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent flex-shrink-0 group-hover:bg-accent group-hover:text-white transition-all">
-                <i class="fa fa-magic text-xl"></i>
-              </div>
-              <div>
-                <h3 class="text-xl font-bold mb-2 group-hover:text-accent transition-colors">智能学习</h3>
-                <p class="text-light/60">内置AI学习系统，能够根据您的使用习惯进行个性化调整，提供越来越贴心的服务体验。</p>
-              </div>
-            </div>
-            
-            <!-- 特性 4 -->
-            <div class="flex gap-4 group">
-              <div class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500 flex-shrink-0 group-hover:bg-green-500 group-hover:text-white transition-all">
-                <i class="fa fa-globe text-xl"></i>
-              </div>
-              <div>
-                <h3 class="text-xl font-bold mb-2 group-hover:text-green-500 transition-colors">全球连接</h3>
-                <p class="text-light/60">支持多频段网络和全球服务覆盖，无论您身在何处，都能保持稳定连接和一致的服务体验。</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 特性展示图 -->
-        <div class="relative animate-on-scroll">
-          <div class="relative z-10 rounded-2xl overflow-hidden border border-light/10 bg-darker/50 backdrop-blur-sm shadow-xl">
-            <img src="https://picsum.photos/id/8/600/800" alt="产品特性展示" class="w-full h-auto">
-          </div>
-          
-          <!-- 悬浮元素 -->
-          <div class="absolute top-1/4 -left-8 w-48 h-48 bg-primary/10 border border-primary/20 rounded-xl p-5 animate-float">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                <i class="fa fa-tachometer"></i>
-              </div>
-              <h4 class="font-bold">处理速度提升</h4>
-            </div>
-            <div class="text-3xl font-bold text-white mb-1">215%</div>
-            <div class="text-xs text-light/60">相比上一代产品</div>
-          </div>
-          
-          <div class="absolute bottom-1/4 -right-8 w-48 h-48 bg-secondary/10 border border-secondary/20 rounded-xl p-5 animate-float-delay-1">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
-                <i class="fa fa-battery-full"></i>
-              </div>
-              <h4 class="font-bold">电池续航</h4>
-            </div>
-            <div class="text-3xl font-bold text-white mb-1">48小时</div>
-            <div class="text-xs text-light/60">持续使用时间</div>
-          </div>
-          
-          <!-- 装饰元素 -->
-          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full border border-primary/20 animate-pulse-slow"></div>
-          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full border border-secondary/20 animate-pulse-slow" style="animation-delay: 1s"></div>
-        </div>
-      </div>
-      
-      <!-- 技术规格 -->
-      <div class="mt-32 animate-on-scroll">
-        <h3 class="text-2xl font-bold text-center mb-12">技术规格对比</h3>
-        
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <!-- 规格 1 -->
-          <div class="bg-darker/50 border border-light/10 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-all">
-            <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
-              <i class="fa fa-microchip text-2xl"></i>
-            </div>
-            <h4 class="font-bold mb-2">处理器</h4>
-            <p class="text-light/60 text-sm">量子X5 八核处理器</p>
-          </div>
-          
-          <!-- 规格 2 -->
-          <div class="bg-darker/50 border border-light/10 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-all">
-            <div class="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mx-auto mb-4">
-              <i class="fa fa-memory text-2xl"></i>
-            </div>
-            <h4 class="font-bold mb-2">内存</h4>
-            <p class="text-light/60 text-sm">最高32GB 高速缓存</p>
-          </div>
-          
-          <!-- 规格 3 -->
-          <div class="bg-darker/50 border border-light/10 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-all">
-            <div class="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center text-accent mx-auto mb-4">
-              <i class="fa fa-wifi text-2xl"></i>
-            </div>
-            <h4 class="font-bold mb-2">Connectivity</h4>
-            <p class="text-light/60 text-sm">5G/Wi-Fi 6E/蓝牙5.3</p>
-          </div>
-          
-          <!-- 规格 4 -->
-          <div class="bg-darker/50 border border-light/10 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-all">
-            <div class="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mx-auto mb-4">
-              <i class="fa fa-tint text-2xl"></i>
-            </div>
-            <h4 class="font-bold mb-2">防护等级</h4>
-            <p class="text-light/60 text-sm">IP68 防水防尘</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 数据统计区 -->
-  <section class="py-24 relative bg-darker">
-    <div class="container mx-auto px-4 md:px-8">
-      <div class="text-center max-w-3xl mx-auto mb-16 animate-on-scroll">
-        <span class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium mb-4">
-          数据洞察
-        </span>
-        <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-4">
-          用数据说话
-        </h2>
-        <p class="text-light/70 text-lg">
-          我们的解决方案为全球客户带来了显著的业务提升和效率改善，以下是关键数据指标。
-        </p>
-      </div>
-      
-      <!-- 数据卡片 -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
-        <!-- 数据 1 -->
-        <div class="bg-dark border border-light/10 rounded-xl p-6 text-center animate-on-scroll" style="animation-delay: 0.1s">
-          <div class="text-4xl font-bold text-primary mb-2 counter" data-target="98">0</div>
-          <div class="text-light/60">客户满意度 (%)</div>
-        </div>
-        
-        <!-- 数据 2 -->
-        <div class="bg-dark border border-light/10 rounded-xl p-6 text-center animate-on-scroll" style="animation-delay: 0.2s">
-          <div class="text-4xl font-bold text-secondary mb-2 counter" data-target="200">0</div>
-          <div class="text-light/60">全球客户</div>
-        </div>
-        
-        <!-- 数据 3 -->
-        <div class="bg-dark border border-light/10 rounded-xl p-6 text-center animate-on-scroll" style="animation-delay: 0.3s">
-          <div class="text-4xl font-bold text-accent mb-2 counter" data-target="65">0</div>
-          <div class="text-light/60">效率提升 (%)</div>
-        </div>
-        
-        <!-- 数据 4 -->
-        <div class="bg-dark border border-light/10 rounded-xl p-6 text-center animate-on-scroll" style="animation-delay: 0.4s">
-          <div class="text-4xl font-bold text-green-500 mb-2 counter" data-target="35">0</div>
-          <div class="text-light/60">成本降低 (%)</div>
-        </div>
-      </div>
-      
-      <!-- 图表区域 -->
-      <div class="grid md:grid-cols-2 gap-8">
-        <!-- 图表 1 - 产品使用增长趋势 -->
-        <div class="bg-dark border border-light/10 rounded-xl p-6 animate-on-scroll">
-          <h3 class="text-xl font-bold mb-6">产品使用增长趋势</h3>
-          <div class="h-80">
-            <canvas id="growthChart"></canvas>
-          </div>
-        </div>
-        
-        <!-- 图表 2 - 客户行业分布 -->
-        <div class="bg-dark border border-light/10 rounded-xl p-6 animate-on-scroll" style="animation-delay: 0.2s">
-          <h3 class="text-xl font-bold mb-6">客户行业分布</h3>
-          <div class="h-80">
-            <canvas id="industryChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 科技资讯区 -->
-  <section id="insights" class="py-24 relative bg-dark bg-grid">
-    <div class="container mx-auto px-4 md:px-8">
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16">
-        <div class="animate-on-scroll">
-          <span class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium mb-4">
-            科技洞察
-          </span>
-          <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-4">
-            前沿科技资讯
-          </h2>
-          <p class="text-light/70 text-lg max-w-2xl">
-            探索最新的科技趋势、行业动态和我们的技术洞察，把握未来科技发展方向。
-          </p>
-        </div>
-        
-        <a href="#" class="mt-6 md:mt-0 text-primary hover:text-primary/80 font-medium flex items-center gap-2 transition-colors animate-on-scroll" style="animation-delay: 0.2s">
-          查看所有文章 <i class="fa fa-long-arrow-right"></i>
-        </a>
-      </div>
-      
-      <!-- 资讯网格 -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <!-- 资讯卡片 1 -->
-        <div class="group bg-darker border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll">
-          <div class="relative overflow-hidden h-56">
-            <img src="https://picsum.photos/id/9/600/400" alt="人工智能的未来发展" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
-            <div class="absolute bottom-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-primary/90 text-white rounded-full">人工智能</span>
-            </div>
-          </div>
-          <div class="p-6">
-            <div class="flex items-center gap-3 text-light/50 text-sm mb-3">
-              <span><i class="fa fa-calendar-o mr-1"></i> 2023-06-15</span>
-              <span><i class="fa fa-user-o mr-1"></i> 李明</span>
-            </div>
-            <h3 class="text-xl font-bold mb-3 group-hover:text-primary transition-colors">人工智能如何重塑未来十年的产业格局</h3>
-            <p class="text-light/60 text-sm mb-4">
-              人工智能技术正以前所未有的速度发展，本文探讨了AI将如何改变各个行业的运作方式和商业模式。
-            </p>
-            <a href="#" class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 transition-colors">
-              阅读全文 <i class="fa fa-angle-right"></i>
-            </a>
-          </div>
-        </div>
-        
-        <!-- 资讯卡片 2 -->
-        <div class="group bg-darker border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll" style="animation-delay: 0.1s">
-          <div class="relative overflow-hidden h-56">
-            <img src="https://picsum.photos/id/10/600/400" alt="量子计算进展" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
-            <div class="absolute bottom-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-secondary/90 text-white rounded-full">量子计算</span>
-            </div>
-          </div>
-          <div class="p-6">
-            <div class="flex items-center gap-3 text-light/50 text-sm mb-3">
-              <span><i class="fa fa-calendar-o mr-1"></i> 2023-06-08</span>
-              <span><i class="fa fa-user-o mr-1"></i> 张伟</span>
-            </div>
-            <h3 class="text-xl font-bold mb-3 group-hover:text-secondary transition-colors">量子计算突破：首次实现50量子比特稳定运行</h3>
-            <p class="text-light/60 text-sm mb-4">
-              最新研究成果显示，科学家已成功实现50量子比特的稳定运行，这一突破将加速量子优势的实现。
-            </p>
-            <a href="#" class="text-secondary hover:text-secondary/80 text-sm font-medium flex items-center gap-1 transition-colors">
-              阅读全文 <i class="fa fa-angle-right"></i>
-            </a>
-          </div>
-        </div>
-        
-        <!-- 资讯卡片 3 -->
-        <div class="group bg-darker border border-light/10 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 animate-on-scroll" style="animation-delay: 0.2s">
-          <div class="relative overflow-hidden h-56">
-            <img src="https://picsum.photos/id/11/600/400" alt="元宇宙发展" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
-            <div class="absolute bottom-4 left-4">
-              <span class="text-xs font-medium px-3 py-1 bg-accent/90 text-white rounded-full">元宇宙</span>
-            </div>
-          </div>
-          <div class="p-6">
-            <div class="flex items-center gap-3 text-light/50 text-sm mb-3">
-              <span><i class="fa fa-calendar-o mr-1"></i> 2023-05-29</span>
-              <span><i class="fa fa-user-o mr-1"></i> 王芳</span>
-            </div>
-            <h3 class="text-xl font-bold mb-3 group-hover:text-accent transition-colors">元宇宙：虚拟与现实的融合将如何改变社交方式</h3>
-            <p class="text-light/60 text-sm mb-4">
-              元宇宙技术的发展正在模糊虚拟与现实的界限，本文分析了这一趋势对人类社交行为的深远影响。
-            </p>
-            <a href="#" class="text-accent hover:text-accent/80 text-sm font-medium flex items-center gap-1 transition-colors">
-              阅读全文 <i class="fa fa-angle-right"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 视频资讯 -->
-      <div class="mt-16 animate-on-scroll">
-        <h3 class="text-2xl font-bold mb-8">科技视频</h3>
-        
-        <div class="grid md:grid-cols-3 gap-6">
-          <!-- 视频 1 -->
-          <div class="group relative rounded-xl overflow-hidden h-48 animate-on-scroll" style="animation-delay: 0.1s">
-            <img src="https://picsum.photos/id/12/600/400" alt="视频缩略图" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-dark/60 group-hover:bg-dark/40 transition-colors"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center text-white transform group-hover:scale-110 transition-transform">
-                <i class="fa fa-play text-xl"></i>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 p-4">
-              <h4 class="font-bold text-white">Nexus Pro 深度评测</h4>
-              <div class="text-light/60 text-sm mt-1">12:35</div>
-            </div>
-          </div>
-          
-          <!-- 视频 2 -->
-          <div class="group relative rounded-xl overflow-hidden h-48 animate-on-scroll" style="animation-delay: 0.2s">
-            <img src="https://picsum.photos/id/13/600/400" alt="视频缩略图" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-dark/60 group-hover:bg-dark/40 transition-colors"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center text-white transform group-hover:scale-110 transition-transform">
-                <i class="fa fa-play text-xl"></i>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 p-4">
-              <h4 class="font-bold text-white">AI如何改变软件开发</h4>
-              <div class="text-light/60 text-sm mt-1">08:42</div>
-            </div>
-          </div>
-          
-          <!-- 视频 3 -->
-          <div class="group relative rounded-xl overflow-hidden h-48 animate-on-scroll" style="animation-delay: 0.3s">
-            <img src="https://picsum.photos/id/14/600/400" alt="视频缩略图" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-dark/60 group-hover:bg-dark/40 transition-colors"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center text-white transform group-hover:scale-110 transition-transform">
-                <i class="fa fa-play text-xl"></i>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-0 p-4">
-              <h4 class="font-bold text-white">未来智能家居演示</h4>
-              <div class="text-light/60 text-sm mt-1">15:18</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 团队展示区 -->
-  <section id="about" class="py-24 relative bg-darker">
-    <div class="container mx-auto px-4 md:px-8">
-      <div class="text-center max-w-3xl mx-auto mb-16 animate-on-scroll">
-        <span class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium mb-4">
-          关于我们
-        </span>
-        <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-4">
-          创新团队
-        </h2>
-        <p class="text-light/70 text-lg">
-          我们的团队由来自全球各地的顶尖人才组成，致力于用科技改变世界，创造更美好的未来。
-        </p>
-      </div>
-      
-      <!-- 团队成员 -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- 成员 1 -->
-        <div class="group animate-on-scroll">
-          <div class="relative overflow-hidden rounded-xl mb-4">
-            <img src="https://picsum.photos/id/1010/400/400" alt="张明 - CEO" class="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-t from-darker via-darker/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-              <div class="p-6 w-full">
-                <div class="flex justify-center gap-3">
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-linkedin"></i>
-                  </a>
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-twitter"></i>
-                  </a>
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-envelope-o"></i>
-                  </a>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-count">0</div>
+                    <div class="stat-label">总访问量</div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <h3 class="text-xl font-bold group-hover:text-primary transition-colors">张明</h3>
-          <p class="text-light/60">首席执行官</p>
-        </div>
-        
-        <!-- 成员 2 -->
-        <div class="group animate-on-scroll" style="animation-delay: 0.1s">
-          <div class="relative overflow-hidden rounded-xl mb-4">
-            <img src="https://picsum.photos/id/1011/400/400" alt="李华 - CTO" class="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-t from-darker via-darker/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-              <div class="p-6 w-full">
-                <div class="flex justify-center gap-3">
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-linkedin"></i>
-                  </a>
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-twitter"></i>
-                  </a>
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-envelope-o"></i>
-                  </a>
+                <div class="stat-card">
+                    <div class="stat-number" id="daily-count">0</div>
+                    <div class="stat-label">今日访问</div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <h3 class="text-xl font-bold group-hover:text-primary transition-colors">李华</h3>
-          <p class="text-light/60">首席技术官</p>
-        </div>
-        
-        <!-- 成员 3 -->
-        <div class="group animate-on-scroll" style="animation-delay: 0.2s">
-          <div class="relative overflow-hidden rounded-xl mb-4">
-            <img src="https://picsum.photos/id/1012/400/400" alt="王芳 - 产品总监" class="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-t from-darker via-darker/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-              <div class="p-6 w-full">
-                <div class="flex justify-center gap-3">
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-linkedin"></i>
-                  </a>
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-twitter"></i>
-                  </a>
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-envelope-o"></i>
-                  </a>
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">资料</div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <h3 class="text-xl font-bold group-hover:text-primary transition-colors">王芳</h3>
-          <p class="text-light/60">产品总监</p>
-        </div>
-        
-        <!-- 成员 4 -->
-        <div class="group animate-on-scroll" style="animation-delay: 0.3s">
-          <div class="relative overflow-hidden rounded-xl mb-4">
-            <img src="https://picsum.photos/id/1013/400/400" alt="赵强 - 设计主管" class="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-t from-darker via-darker/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-              <div class="p-6 w-full">
-                <div class="flex justify-center gap-3">
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-linkedin"></i>
-                  </a>
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-twitter"></i>
-                  </a>
-                  <a href="#" class="w-8 h-8 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-                    <i class="fa fa-envelope-o"></i>
-                  </a>
+                <div class="stat-card">
+                    <div class="stat-number">13</div>
+                    <div class="stat-label">小程序</div>
                 </div>
-              </div>
             </div>
-          </div>
-          <h3 class="text-xl font-bold group-hover:text-primary transition-colors">赵强</h3>
-          <p class="text-light/60">设计主管</p>
         </div>
-      </div>
-      
-      <!-- 公司简介 -->
-      <div class="mt-24 grid md:grid-cols-2 gap-16 items-center">
-        <div class="animate-on-scroll">
-          <h3 class="text-2xl font-bold mb-6">我们的故事</h3>
-          <p class="text-light/70 mb-6">
-            NexTech成立于2015年，由一群对科技充满热情的工程师和设计师创立。我们的使命是通过创新技术解决现实世界的问题，为用户创造更智能、更便捷的生活体验。
-          </p>
-          <p class="text-light/70 mb-6">
-            多年来，我们不断突破技术边界，推出了一系列备受好评的产品和服务，服务于全球200多个国家和地区的客户。我们相信，科技的力量可以改变世界，而我们正致力于成为这一变革的引领者。
-          </p>
-          
-          <div class="grid grid-cols-2 gap-6 mt-8">
-            <div>
-              <h4 class="text-xl font-bold text-primary mb-2">2015</h4>
-              <p class="text-light/60">公司成立，推出首款智能硬件产品</p>
-            </div>
-            <div>
-              <h4 class="text-xl font-bold text-primary mb-2">2018</h4>
-              <p class="text-light/60">完成A轮融资，扩展研发团队</p>
-            </div>
-            <div>
-              <h4 class="text-xl font-bold text-primary mb-2">2020</h4>
-              <p class="text-light/60">全球用户突破100万，推出AI助手</p>
-            </div>
-            <div>
-              <h4 class="text-xl font-bold text-primary mb-2">2023</h4>
-              <p class="text-light/60">发布新一代物联网平台，进入新市场</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="relative animate-on-scroll" style="animation-delay: 0.2s">
-          <img src="https://picsum.photos/id/15/600/400" alt="公司办公环境" class="w-full h-auto rounded-xl shadow-xl">
-          <div class="absolute -bottom-6 -left-6 bg-dark border border-light/10 rounded-xl p-6 shadow-lg max-w-xs">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                <i class="fa fa-lightbulb-o text-xl"></i>
-              </div>
-              <div>
-                <h4 class="font-bold">我们的使命</h4>
-                <p class="text-light/60 text-sm">用科技创造更美好的未来</p>
-              </div>
-            </div>
-            <p class="text-light/70 text-sm">
-              我们致力于通过创新技术解决全球面临的重大挑战，推动社会进步和可持续发展。
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- 客户评价 -->
-  <section class="py-24 relative bg-dark overflow-hidden">
-    <!-- 背景装饰 -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
-    </div>
-    
-    <div class="container mx-auto px-4 md:px-8 relative z-10">
-      <div class="text-center max-w-3xl mx-auto mb-16 animate-on-scroll">
-        <span class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium mb-4">
-          客户反馈
-        </span>
-        <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-4">
-          他们对我们的评价
-        </h2>
-        <p class="text-light/70 text-lg">
-          来自全球客户的真实反馈，见证我们产品和服务的品质与价值。
-        </p>
-      </div>
-      
-      <!-- 评价 -->
-      <div class="grid md:grid-cols-3 gap-8">
-        <!-- 评价 1 -->
-        <div class="bg-darker border border-light/10 rounded-xl p-6 h-full">
-          <div class="flex items-center gap-1 text-yellow-400 mb-4">
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-          </div>
-          <p class="text-light/80 mb-6 italic">
-            "NexTech的解决方案彻底改变了我们的业务运营方式。实施他们的系统后，我们的工作效率提升了65%，成本降低了30%。这是我们近年来做的最明智的投资之一。"
-          </p>
-          <div class="flex items-center gap-4">
-            <img src="https://picsum.photos/id/1020/60/60" alt="客户头像" class="w-12 h-12 rounded-full object-cover">
-            <div>
-              <h4 class="font-bold">刘强</h4>
-              <p class="text-light/60 text-sm">某科技公司 CEO</p>
-            </div>
-          </div>
+        <div class="scroll-hint">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
         </div>
-        
-        <!-- 评价 2 -->
-        <div class="bg-darker border border-light/10 rounded-xl p-6 h-full">
-          <div class="flex items-center gap-1 text-yellow-400 mb-4">
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-          </div>
-          <p class="text-light/80 mb-6 italic">
-            "作为一家医疗机构，我们非常重视数据安全和系统稳定性。NexTech的产品不仅满足了我们严格的安全要求，而且提供了卓越的性能和用户体验，帮助我们更好地服务患者。"
-          </p>
-          <div class="flex items-center gap-4">
-            <img src="https://picsum.photos/id/1021/60/60" alt="客户头像" class="w-12 h-12 rounded-full object-cover">
-            <div>
-              <h4 class="font-bold">陈医生</h4>
-              <p class="text-light/60 text-sm">某医院信息部主任</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 评价 3 -->
-        <div class="bg-darker border border-light/10 rounded-xl p-6 h-full">
-          <div class="flex items-center gap-1 text-yellow-400 mb-4">
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star"></i>
-            <i class="fa fa-star-half-o"></i>
-          </div>
-          <p class="text-light/80 mb-6 italic">
-            "我们学校引入了NexTech的智慧教育解决方案，教学效果和管理效率都得到了显著提升。学生们对互动式学习方式反响热烈，老师们也从繁琐的行政工作中解放出来。"
-          </p>
-          <div class="flex items-center gap-4">
-            <img src="https://picsum.photos/id/1022/60/60" alt="客户头像" class="w-12 h-12 rounded-full object-cover">
-            <div>
-              <h4 class="font-bold">王校长</h4>
-              <p class="text-light/60 text-sm">某中学校长</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- 联系表单 -->
-  <section id="contact" class="py-24 relative bg-darker">
-    <div class="container mx-auto px-4 md:px-8">
-      <div class="grid md:grid-cols-2 gap-16 items-center">
-        <div class="animate-on-scroll">
-          <span class="inline-block px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-primary text-sm font-medium mb-4">
-            联系我们
-          </span>
-          <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-6">
-            让我们一起创造<br>更美好的未来
-          </h2>
-          <p class="text-light/70 text-lg mb-8">
-            无论您有任何疑问、建议或合作意向，都欢迎与我们联系。我们的团队将尽快回复您。
-          </p>
-          
-          <div class="space-y-6 mb-8">
-            <div class="flex items-start gap-4">
-              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 mt-1">
-                <i class="fa fa-map-marker"></i>
-              </div>
-              <div>
-                <h3 class="font-bold mb-1">公司地址</h3>
-                <p class="text-light/60">北京市海淀区中关村科技园区8号楼</p>
-              </div>
-            </div>
-            
-            <div class="flex items-start gap-4">
-              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 mt-1">
-                <i class="fa fa-phone"></i>
-              </div>
-              <div>
-                <h3 class="font-bold mb-1">联系电话</h3>
-                <p class="text-light/60">+86 10 8888 8888</p>
-              </div>
-            </div>
-            
-            <div class="flex items-start gap-4">
-              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 mt-1">
-                <i class="fa fa-envelope-o"></i>
-              </div>
-              <div>
-                <h3 class="font-bold mb-1">电子邮箱</h3>
-                <p class="text-light/60">contact@nextech.com</p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="flex gap-4">
-            <a href="#" class="w-10 h-10 rounded-full bg-light/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-              <i class="fa fa-weixin"></i>
-            </a>
-            <a href="#" class="w-10 h-10 rounded-full bg-light/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-              <i class="fa fa-weibo"></i>
-            </a>
-            <a href="#" class="w-10 h-10 rounded-full bg-light/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-              <i class="fa fa-linkedin"></i>
-            </a>
-            <a href="#" class="w-10 h-10 rounded-full bg-light/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-              <i class="fa fa-twitter"></i>
-            </a>
-          </div>
-        </div>
-        
-        <div class="animate-on-scroll" style="animation-delay: 0.2s">
-          <div class="bg-dark border border-light/10 rounded-xl p-8 shadow-xl">
-            <h3 class="text-2xl font-bold mb-6">发送消息</h3>
-            <form id="contact-form" class="space-y-6">
-              <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label for="name" class="block text-light/80 mb-2 font-medium">姓名</label>
-                  <input type="text" id="name" class="w-full bg-darker border border-light/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition-colors" placeholder="请输入您的姓名">
+    <!-- 关于区域 -->
+    <section class="section about-section" id="about">
+        <div class="container">
+            <h2 class="section-title">关于网站</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>你好,我是 chonger。</p>
+                    <p>这是我的个人主页，在这里分享我的思考、学习资料和一些有趣的小游戏。</p>
+                    <p>欢迎探索，希望你能找到感兴趣的内容。</p>
+                    <p>更新日志</p>
+               <a href="data.html" class="play-btn">前往</a>
                 </div>
-                <div>
-                  <label for="email" class="block text-light/80 mb-2 font-medium">邮箱</label>
-                  <input type="email" id="email" class="w-full bg-darker border border-light/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition-colors" placeholder="请输入您的邮箱">
+                <div class="about-tags">
+                    <span class="tag">设计</span>
+                    <span class="tag">编程</span>
+                    <span class="tag">摄影</span>
+                    <span class="tag">阅读</span>
+                    <span class="tag">音乐</span>
                 </div>
-              </div>
-              
-              <div>
-                <label for="subject" class="block text-light/80 mb-2 font-medium">主题</label>
-                <input type="text" id="subject" class="w-full bg-darker border border-light/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition-colors" placeholder="请输入消息主题">
-              </div>
-              
-              <div>
-                <label for="message" class="block text-light/80 mb-2 font-medium">消息内容</label>
-                <textarea id="message" rows="5" class="w-full bg-darker border border-light/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition-colors resize-none" placeholder="请输入您的消息内容"></textarea>
-              </div>
-              
-              <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-primary/20 font-medium flex items-center justify-center gap-2">
-                发送消息 <i class="fa fa-paper-plane"></i>
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- 订阅区域 -->
-  <section class="py-16 relative bg-primary/10">
-    <div class="container mx-auto px-4 md:px-8">
-      <div class="max-w-4xl mx-auto text-center animate-on-scroll">
-        <h2 class="text-2xl md:text-3xl font-bold mb-4">订阅我们的科技资讯</h2>
-        <p class="text-light/70 mb-8 max-w-2xl mx-auto">
-          及时获取最新的产品信息、科技动态和独家优惠，不错过任何重要更新。
-        </p>
-        
-        <form class="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-          <input type="email" placeholder="请输入您的邮箱地址" class="flex-1 bg-darker border border-light/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition-colors">
-          <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-primary/20 font-medium whitespace-nowrap">
-            立即订阅
-          </button>
-        </form>
-        
-        <p class="text-light/50 text-sm mt-4">
-          我们尊重您的隐私，绝不会向第三方分享您的信息。
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 页脚 -->
-  <footer class="bg-darker pt-16 pb-8">
-    <div class="container mx-auto px-4 md:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-        <div class="lg:col-span-2">
-          <a href="#" class="flex items-center gap-2 mb-6">
-            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span class="text-white font-bold text-xl">N</span>
             </div>
-            <span class="text-xl font-bold tracking-tight">NexTech</span>
-          </a>
-          <p class="text-light/70 mb-6 max-w-md">
-            我们致力于通过创新技术为用户创造更智能、更便捷的生活和工作体验，推动科技进步和社会发展。
-          </p>
-          <div class="flex gap-4">
-            <a href="#" class="w-10 h-10 rounded-full bg-light/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-              <i class="fa fa-weixin"></i>
-            </a>
-            <a href="#" class="w-10 h-10 rounded-full bg-light/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-              <i class="fa fa-weibo"></i>
-            </a>
-            <a href="#" class="w-10 h-10 rounded-full bg-light/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-              <i class="fa fa-linkedin"></i>
-            </a>
-            <a href="#" class="w-10 h-10 rounded-full bg-light/10 hover:bg-primary flex items-center justify-center text-white transition-colors">
-              <i class="fa fa-twitter"></i>
-            </a>
-          </div>
         </div>
-        
-        <div>
-          <h4 class="font-bold text-lg mb-6">产品</h4>
-          <ul class="space-y-3">
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">Nexus Pro 智能终端</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">Aura 智能家居系统</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">Vortex 云服务平台</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">Pulse 健康监测手环</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">NexAI 人工智能助手</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="font-bold text-lg mb-6">公司</h4>
-          <ul class="space-y-3">
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">关于我们</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">团队</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">新闻中心</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">加入我们</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">联系我们</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="font-bold text-lg mb-6">支持</h4>
-          <ul class="space-y-3">
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">帮助中心</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">产品手册</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">常见问题</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">技术支持</a></li>
-            <li><a href="#" class="text-light/70 hover:text-primary transition-colors">售后服务</a></li>
-          </ul>
-        </div>
-      </div>
-      
-      <hr class="border-light/10 mb-8">
-      
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <p class="text-light/50 text-sm mb-4 md:mb-0">
-          &copy; 2025 Chonger. 保留所有权利。
-        </p>
-        <div class="flex gap-6">
-          <a href="#" class="text-light/50 hover:text-primary text-sm transition-colors">隐私政策</a>
-          <a href="#" class="text-light/50 hover:text-primary text-sm transition-colors">服务条款</a>
-          <a href="#" class="text-light/50 hover:text-primary text-sm transition-colors">Cookie 政策</a>
-        </div>
-      </div>
-    </div>
-  </footer>
+    </section>
 
-  <!-- 返回顶部按钮 -->
-  <button id="back-to-top" class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg opacity-0 invisible transition-all z-50">
-    <i class="fa fa-angle-up text-xl"></i>
-  </button>
-  <script src="script.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4/dist/av-min.js"></script>
-       <script>
-// 替换为你的LeanCloud AppID和AppKey
+    <!-- 资料区域 -->
+    <section class="section resources-section" id="resources">
+        <div class="container">
+            <h2 class="section-title">资料分享</h2>
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-icon">📚</div>
+                    <h3>学习笔记</h3>
+                    <p>技术学习、读书笔记和思考总结</p>
+                    <a href="#" class="resource-link">查看更多 →</a>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">💻</div>
+                    <h3>开发文档</h3>
+                    <p>项目文档、代码片段和工具推荐</p>
+                    <a href="#" class="resource-link">查看更多 →</a>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">🎨</div>
+                    <h3>设计资源</h3>
+                    <p>设计灵感、配色方案和素材收藏</p>
+                    <a href="#" class="resource-link">查看更多 →</a>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">🔧</div>
+                    <h3>实用工具</h3>
+                    <p>效率工具、软件推荐和使用技巧</p>
+                    <a href="#" class="resource-link">查看更多 →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 小游戏区域 -->
+    <section class="section games-section" id="games">
+        <div class="container">
+            <h2 class="section-title">小程序</h2>
+            <div class="games-grid">
+                <div class="game-card">
+                    <div class="game-preview">🎯</div>
+                    <h3>抽签游戏</h3>
+                    <p>测试你的幸运</p>
+                    <a href="kjfl\抽签.html" class="play-btn">前往</a>
+                </div>
+                <div class="game-card">
+                    <div class="game-preview">🧩</div>
+                    <h3>英文测试</h3>
+                    <p>锻炼英文能力</p>
+                   <a href="kjfl\engtest.html" class="play-btn">前往</a>
+                </div>
+                <div class="game-card">
+                    <div class="game-preview">🎪</div>
+                    <h3>更多程序</h3>
+                    <p>持续更新中...</p>
+                    <a href="kjfl\fl.html" class="play-btn">更多</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 更多区域 -->
+    <section class="section more-section" id="more">
+        <div class="container">
+            <h2 class="section-title">更多</h2>
+            <div class="more-content">
+                <div class="contact-info">
+                    <h3>打印服务</h3>
+                    <div class="contact-links"></div>
+                    <a href="打印服务\打印.html" class="contact-item">
+                            <span class="contact-icon">📱</span>
+                            <span>打印服务</span>
+                        </a>
+                    <h3>联系方式</h3>
+                    <div class="contact-links">
+                        <a href="#" class="contact-item">
+                            <span class="contact-icon">📧</span>
+                            <span>邮箱</span>
+                        </a>
+                        <a href="https://github.com/jason221126" class="contact-item">
+                            <span class="contact-icon">🐙</span>
+                            <span>GitHub</span>
+                        </a>
+                        <a href="#" class="contact-item">
+                            <span class="contact-icon">📱</span>
+                            <span>微信</span>
+                        </a>
+                        <a href="#" class="contact-item">
+                            <span class="contact-icon">🎵</span>
+                            <span>网易云</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 chonger. 用心分享，简单生活。</p>
+        </div>
+    </footer>
+
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // 新增：汉堡菜单交互逻辑
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.getElementById('nav-menu');
+        
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            // 点击后切换汉堡按钮图标（可选）
+            hamburger.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+        });
+
+        // 点击导航项后关闭菜单（可选优化）
+        navMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                hamburger.textContent = '☰';
+            });
+        });
+
+    // 替换为你的LeanCloud AppID和AppKey
 const APP_ID = "PhugBPgZIvRS0j9P4Pt9kKdj-MdYXbMMI";
 const APP_KEY = "VkfOc6PNz8ggyeFXxPUanpxA";
 

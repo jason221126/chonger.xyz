@@ -1,0 +1,24 @@
+{
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "date": "2026-02-04",
+      "title": "正式版发布",
+      "description": "经过多个测试版本后，我们很高兴推出正式版。",
+      "changes": {
+        "features": [
+          "完整的核心功能集"
+        ],
+        "improvements": [
+          "基于用户反馈的全面优化",
+          "性能调优",
+          "文档完善"
+        ],
+        "fixes": [
+          "解决已知问题"
+        ]
+      },
+      "important": true
+    }
+  ]
+}
